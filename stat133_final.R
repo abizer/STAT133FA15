@@ -37,16 +37,16 @@ unique_titles <- merge(uc2013.titles, uc2014.titles)
 uc2013.total_overhead <- (uc2013 %>% summarize(total = sum(Total)))[[1, 1]] # <- sum(uc2013$Total)
 uc2014.total_overhead <- (uc2014 %>% summarize(total = sum(Total)))[[1, 1]] # <- sum(uc2014$Total)
 
-#added lecturer - Michael
+#added lecturer, students, updated admin to include dean - Michael
 ml <- hash()
 ml[['Athletics']] <- '^ATH|COACH'
 ml[['Professor']] <- 'PROF[^L]'
-ml[['Administrator']] <- 'SUPV|MGR|ADMIN(ISTRATOR)?'
+ml[['Administrator']] <- 'SUPV|MGR|ADMIN(ISTRATOR)?|DEAN'
 ml[['Academic']] <- 'ACAD(EMIC)?'
 ml[['Maintenance']] <- 'MAINT|TECH'
 ml[['Accounting']] <- 'ACCOUNT(ANT|ING)'
-ml[['Assistant']] <- 'ASST'
-ml[['Associate']] <- 'ASSOC'
+ml[['Assistant']] <- 'ASST' #I think this one should be deleted, lots of assistants for different things - Michael
+ml[['Associate']] <- 'ASSOC' #might also have same problem as above (e.g. assoc dean)
 ml[['Visiting']] <- 'VIS'
 ml[['Adjunct']] <- 'ADJ'
 ml[['Lecturer']] <- 'LECT'
@@ -55,6 +55,7 @@ ml[['Nurse']] <- 'NURSE'
 ml[['Admissions']] <- 'ADMISSIONS'
 ml[['Engineer']] <- 'ENGR'
 ml[['Technician']] <- 'TCHN'
+ml[['Student']] <- 'STDT'
 ml[[]]
 
 #changed function to return a data frame - Michael
@@ -136,6 +137,8 @@ uc2014.employee_stats <- uc2014 %>%
               avg_total = mean(Total),
               group_total = sum(Total)) %>%
       mutate(department = guess_department(Title))
+
+
 
 ###############################################################
 #This section defines totals by department/category - Michael
