@@ -5,6 +5,7 @@ library(readr)
 library(ggplot2)
 library(dplyr)
 library(stringr)
+library(hash)
 
 uctca_colnames <- c("Name", "Title", "Base", "Overtime", "Other", "Benefits", "Subtotal", "Total", "Year", "Notes", "Agency")
 
@@ -36,7 +37,7 @@ uc2014.total_overhead <- (uc2014 %>% summarize(total = sum(Total)))[[1, 1]]
 
 ml <- hash()
 ml[['Athletics']] <- '^ATH|COACH'
-ml[['Professor']] <- 'PROF'
+ml[['Professor']] <- 'PROF[^L]'
 ml[['Administrator']] <- 'SUPV|MGR|ADMIN(ISTRATOR)?'
 ml[['Academic']] <- 'ACAD(EMIC)?'
 ml[['Maintenance']] <- 'MAINT|TECH'
@@ -45,7 +46,7 @@ ml[['Assistant']] <- 'ASST'
 ml[['Associate']] <- 'ASSOC'
 ml[['Visiting']] <- 'VIS'
 ml[['Adjunct']] <- 'ADJ'
-ml[['Instructor']] <- 'INSTR'
+ml[['Instructor']] <- 'INSTR[^U]' # don't want instrument or instruction supervisor
 ml[['Nurse']] <- 'NURSE'
 ml[['Admissions']] <- 'ADMISSIONS'
 ml[['Engineer']] <- 'ENGR'
@@ -65,14 +66,61 @@ uc2013.employee_stats <- uc2013 %>%
               avg_base = mean(Base), 
               avg_benefit = mean(Benefits),
               avg_total = mean(Total),
-              group_total = sum(Total)) %>%
+              group_total = sum(Total))
   
 #uc2013.employee_stats <- uc2013.employee_stats %>%
       #group_by(Title) %>%
         #mutate(department = get_dep(Title))
   
 departments <- sapply(ml, function(pat) grepl(pat, uc2013.employee_stats$Title))
+
+uc2013.employee_stats.deps <- cbind(uc2013.employee_stats, departments)
+
+uc2013.faculty <- uc2013.employee_stats.deps %>%
+  filter(Professor == TRUE | Instructor == TRUE) %>%
+    select(Title, n, avg_base, avg_benefit, avg_total, group_total, Professor, Instructor) %>%
+      mutate(category = 'Faculty')
+
+uc2013.faculty.professors <- uc2013.faculty %>% 
+  filter(Instructor == FALSE) %>%
+    select(-Professor, -Instructor) %>%
+      mutate(type = 'Professor')
+
+uc2013.faculty.instructors <- uc2013.faculty %>%
+  filter(Professor == FALSE) %>%
+    select(-Professor, -Instructor) %>%
+      mutate(type = 'Instructor')
+
+uc2013.faculty <- uc2013.faculty.professors %>%
+  bind_rows(uc2013.faculty.instructors)
+
+profvinst_plot <- ggplot(uc2013.faculty, aes(x = type, y = avg_base)) + geom_boxplot()
+
+uc2013.professors.adjunct <- uc2013.professors %>%
+  filter(Adjunct == TRUE)
+
+uc2013.professors.adjunct.only <- uc2013.professors.adjunct %>%
+  filter(Associate == FALSE & Assistant == FALSE)
+
+uc2013.professors.associate <- uc2013.professors %>% 
+  filter(Associate == TRUE)
+
+uc2013.professors.associate.only <- uc2013.professors.associate %>%
+  filter(Adjunct == FALSE & Assistant == FALSE)
+
+uc2013.professors.assistant <- uc2013.professors %>%
+  filter(Assistant == TRUE)
+
+uc2013.professors.assistant.only <- uc2013.professors.assistant %>%
+  filter(Adjunct == FALSE & Associate == FALSE)
+
+uc2013.professors.full <- uc2013.professors %>%
+  filter(Associate == FALSE & Adjunct == FALSE & Assistant == FALSE)
   
+filter_department <- function(df, dfdeps, departments) 
+{
+  df[which(dfdeps[, departments] == TRUE), ]
+}
 
 uc2014.employee_stats <- uc2014 %>% 
   group_by(Title) %>% 
