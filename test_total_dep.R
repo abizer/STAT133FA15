@@ -22,6 +22,17 @@ sum_dep <- function(out){
 out = get_dep(uc2013$Title)
 tot_dep = sum_dep(out) #in a named list
 
-barplot(tot_dep, las = 2)
+barplot(tot_dep, las = 2, main = 'Total in Each Defined Department')
+
+
+tot_dep2 = c(sum(tot_dep[c('Instructor', 'Lecturer',
+                           'Associate', 'Adjunct', 'Assistant',
+                           'Academic', 'Visiting', 'Professor')]),
+             sum(tot_dep[c('Engineer', 'Technician', 'Accounting',
+                           'Nurse', 'Maintenance')]),
+             sum(tot_dep[c('Admissions', 'Administrator')]),
+             sum(tot_dep['Athletics']))
+names(tot_dep2) = c('Faculty', 'Staff', 'Admin', 'Athletics')
+barplot(tot_dep2, main = 'Total by Category') #clearly not a good representation, too much faculty
 
 
