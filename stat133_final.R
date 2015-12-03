@@ -69,7 +69,8 @@ fr[['Assistant Adjunct Professor']] <- 'ASST ADJ PROF'
 fr[['Associate Adjunct Professor']] <- 'ASSOC ADJ PROF'
 fr[['Professor']] <- 'PROF[^L]'
 
-faculty = data.frame(sapply(fr, function(pattern) grepl(pattern, uc2013$Title)))
+faculty_regex = sapply(fr, function(pattern) grepl(pattern, uc2013$Title))
+faculty = Filter(function(x) (any(x)), faculty_regex)
 
 #changed function to return a data frame - Michael
 get_dep <- function(title)
