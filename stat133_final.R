@@ -37,72 +37,14 @@ unique_titles <- merge(uc2013.titles, uc2014.titles)
 uc2013.total_overhead <- (uc2013 %>% summarize(total = sum(Total)))[[1, 1]] # <- sum(uc2013$Total)
 uc2014.total_overhead <- (uc2014 %>% summarize(total = sum(Total)))[[1, 1]] # <- sum(uc2014$Total)
 
-#added lecturer, students, updated admin to include dean - Michael
-ml <- hash()
-ml[['Athletics']] <- '^ATH|COACH'
-ml[['Professor']] <- 'PROF[^L]'
-ml[['Administrator']] <- 'SUPV|MGR|ADMIN(ISTRATOR)?| ADM '
-ml[['Academic']] <- 'ACAD(EMIC)?'
-ml[['Maintenance']] <- 'MAINT|TECH|MECH'
-ml[['Accounting']] <- 'ACCOUNT(ANT|ING)'
-ml[['Assistant']] <- 'ASST' #I think this one should be deleted, lots of assistants for different things - Michael
-ml[['Associate']] <- 'ASSOC' #might also have same problem as above (e.g. assoc dean)
-ml[['Visiting']] <- 'VIS'
-ml[['Adjunct']] <- 'ADJ'
-ml[['Instructor']] <- 'INSTR[^U]' # don't want instrument or instruction supervisor
-ml[['Nurse']] <- 'NURSE'
-ml[['Admissions']] <- 'ADMISSIONS'
-ml[['Engineer']] <- 'ENGR'
-ml[['Technician']] <- 'TCHN'
-ml[['Student']] <- 'STDN?T'
 
-ml[['Lecturer']] <- '[^EL]LECT[ -]'
-ml[['Adjunct Professor']] <- 'ADJ PROF'
-ml[['Assistant Professor']] <- 'ASST PROF'
-ml[['Associate Professor']] <- 'ASSOC PROF'
-ml[['Assistant Adjunct Professor']] <- 'ASST ADJ PROF'
-ml[['Associate Adjunct Professor']] <- 'ASSOC ADJ PROF'
-ml[['Professor']] <- 'PROF[^L]'
-ml[['Post Doc']] <- 'POSTDOC'
-
-ml[['Vice President']] <- '^S?VP '
-ml[['Vice Chancellor']] <- '^VC '
-ml[['Researcher']] <- 'RSCH'
-ml[['Veterinarian']] <- 'VETERINARIAN'
-ml[['Professional']] <- 'PROFL'
-ml[['Teacher']] <- 'TEACHER|EDUCATOR'
-ml[['Dean']] <- 'DEAN'
-ml[['Officer']] <- 'OFCR'
-ml[['Marine']] <- '(ABLE SEAMAN)|(SEA CAPTAIN)|^MARINE'
-ml[['Analyst']] <- 'ANL' # space intentional
-ml[['Therapist']] <- ' THER '
-ml[['Consultant']] <- 'CNSLT'
-ml[['Counselor']] <- 'CNSLR'
-ml[['Medical Misc.']] <- '^MED |^HOSP |^PATIENT |^OPERATING |HEALTH'
-ml[['Library Misc.']] <- 'LIBRAR.+'
-ml[['Operator']] <- 'OPR'
-ml[['Technologist']] <- 'TCHL'
-ml[['Physician | PA']] <- ' PHYS(CN)?'
-ml[['Medical Resident']] <- '^RES-'
-ml[['Programmer']] <- 'PROGR [0-9]'
-ml[['Investments']] <- ' INV |REAL ESTATE'
-ml[['Media/Marketing']] <- 'MEDIA|MARKETING'
-ml[['Legal']] <- 'LEGAL'
-ml[['Lab Worker']] <- '^LAB'
-ml[['Management']] <- 'MGT'
-ml[['Clinial']] <- 'CLIN'
-ml[['Police']] <- 'POLICE'
-ml[['Random']] <- paste0('MAIL|MASSAGE|MASON|FARM |MASON|LINEN|OILER|',
-                         'WIPER|USHER|INSULATION|HIGH VOLT|FUNDRAISER|',
-                         'BLANK |BAKER|BUYER|ARTIST|ART MODEL|AGRON')
-
-
-
+if( !exists('ml'))
+  source("department_regexes.R")
 
 #changed function to return a data frame - Michael
 get_dep <- function(title)
 { # sapply matches regexes against the title, second line collects matched department names
-  out = sapply(ml, function(pattern) grepl(pattern, title))
+  out = sapply(ml, function(pattern) grepl(pattern, title, perl = TRUE))
   return(data.frame(out))
   #out <- names(out)[out]
   #ifelse(!is.null(out), out, 'Undetermined')
