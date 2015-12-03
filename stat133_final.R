@@ -41,21 +41,63 @@ uc2014.total_overhead <- (uc2014 %>% summarize(total = sum(Total)))[[1, 1]] # <-
 ml <- hash()
 ml[['Athletics']] <- '^ATH|COACH'
 ml[['Professor']] <- 'PROF[^L]'
-ml[['Administrator']] <- 'SUPV|MGR|ADMIN(ISTRATOR)?|DEAN'
+ml[['Administrator']] <- 'SUPV|MGR|ADMIN(ISTRATOR)?| ADM '
 ml[['Academic']] <- 'ACAD(EMIC)?'
-ml[['Maintenance']] <- 'MAINT|TECH'
+ml[['Maintenance']] <- 'MAINT|TECH|MECH'
 ml[['Accounting']] <- 'ACCOUNT(ANT|ING)'
 ml[['Assistant']] <- 'ASST' #I think this one should be deleted, lots of assistants for different things - Michael
 ml[['Associate']] <- 'ASSOC' #might also have same problem as above (e.g. assoc dean)
 ml[['Visiting']] <- 'VIS'
 ml[['Adjunct']] <- 'ADJ'
-ml[['Lecturer']] <- 'LECT'
 ml[['Instructor']] <- 'INSTR[^U]' # don't want instrument or instruction supervisor
 ml[['Nurse']] <- 'NURSE'
 ml[['Admissions']] <- 'ADMISSIONS'
 ml[['Engineer']] <- 'ENGR'
 ml[['Technician']] <- 'TCHN'
-ml[['Student']] <- 'STDT'
+ml[['Student']] <- 'STDN?T'
+
+ml[['Lecturer']] <- '[^EL]LECT[ -]'
+ml[['Adjunct Professor']] <- 'ADJ PROF'
+ml[['Assistant Professor']] <- 'ASST PROF'
+ml[['Associate Professor']] <- 'ASSOC PROF'
+ml[['Assistant Adjunct Professor']] <- 'ASST ADJ PROF'
+ml[['Associate Adjunct Professor']] <- 'ASSOC ADJ PROF'
+ml[['Professor']] <- 'PROF[^L]'
+ml[['Post Doc']] <- 'POSTDOC'
+
+ml[['Vice President']] <- '^S?VP '
+ml[['Vice Chancellor']] <- '^VC '
+ml[['Researcher']] <- 'RSCH'
+ml[['Veterinarian']] <- 'VETERINARIAN'
+ml[['Professional']] <- 'PROFL'
+ml[['Teacher']] <- 'TEACHER|EDUCATOR'
+ml[['Dean']] <- 'DEAN'
+ml[['Officer']] <- 'OFCR'
+ml[['Marine']] <- '(ABLE SEAMAN)|(SEA CAPTAIN)|^MARINE'
+ml[['Analyst']] <- 'ANL' # space intentional
+ml[['Therapist']] <- ' THER '
+ml[['Consultant']] <- 'CNSLT'
+ml[['Counselor']] <- 'CNSLR'
+ml[['Medical Misc.']] <- '^MED |^HOSP |^PATIENT |^OPERATING |HEALTH'
+ml[['Library Misc.']] <- 'LIBRAR.+'
+ml[['Operator']] <- 'OPR'
+ml[['Technologist']] <- 'TCHL'
+ml[['Physician | PA']] <- ' PHYS(CN)?'
+ml[['Medical Resident']] <- '^RES-'
+ml[['Programmer']] <- 'PROGR [0-9]'
+ml[['Investments']] <- ' INV |REAL ESTATE'
+ml[['Media/Marketing']] <- 'MEDIA|MARKETING'
+ml[['Legal']] <- 'LEGAL'
+ml[['Lab Worker']] <- '^LAB'
+ml[['Management']] <- 'MGT'
+ml[['Clinial']] <- 'CLIN'
+ml[['Police']] <- 'POLICE'
+ml[['Random']] <- paste0('MAIL|MASSAGE|MASON|FARM |MASON|LINEN|OILER|',
+                         'WIPER|USHER|INSULATION|HIGH VOLT|FUNDRAISER|',
+                         'BLANK |BAKER|BUYER|ARTIST|ART MODEL|AGRON')
+
+
+
 
 #changed function to return a data frame - Michael
 get_dep <- function(title)
@@ -64,6 +106,35 @@ get_dep <- function(title)
   return(data.frame(out))
   #out <- names(out)[out]
   #ifelse(!is.null(out), out, 'Undetermined')
+}
+
+dataset_metrics <- function()
+{
+  match_dep <- function(title)
+  {
+   # print(title)
+    matched_departments <- sapply(ml, function(pattern) grepl(pattern, title))
+    # return the name of the first matched department, just for metrics on how much of the dataset has been tagged
+    #matched <- names(matched_departments)[matched_departments[1]]
+    return(
+      ifelse(any(matched_departments), T, F)
+    )
+  }
+  
+  tagged <- uc2013.employee_stats %>%
+    group_by(Title) %>%
+    mutate(department = match_dep(Title)) %>%
+    select(Title, department)
+  
+  num_tagged <- sum(tagged$department)
+  percent_tagged = num_tagged / nrow(tagged)
+  
+  return(list(
+    percent_tagged = percent_tagged,
+    num_untagged = nrow(tagged) - num_tagged,
+    untagged = tagged$Title[which(tagged$department == FALSE)]
+  ))
+
 }
 
 uc2013.employee_stats <- uc2013 %>% 
@@ -95,9 +166,6 @@ uc2013.faculty.professors <- uc2013.faculty %>%
 uc2013.faculty.instructors <- uc2013.faculty %>%
   filter(Professor == FALSE) %>%
     select(-Professor, -Instructor) %>%
-  
-  
-  
       mutate(type = 'Instructor')
 
 uc2013.faculty <- uc2013.faculty.professors %>%
