@@ -56,7 +56,6 @@ ml[['Admissions']] <- 'ADMISSIONS'
 ml[['Engineer']] <- 'ENGR'
 ml[['Technician']] <- 'TCHN'
 ml[['Student']] <- 'STDT'
-ml[[]]
 
 #changed function to return a data frame - Michael
 get_dep <- function(title)
@@ -144,33 +143,23 @@ uc2014.employee_stats <- uc2014 %>%
 #This section defines totals by department/category - Michael
 ###############################################################
 
-#this function calculates the total in each department
-vec = c()
-sum_dep <- function(out){
-  for (i in 1:length(colnames(out))){
-    sum = sum(out[ , i])
-    vec = c(vec, sum)
-  }
-  names(vec) = colnames(out)
-  return(vec)
-}
-
 #using functions to get total in each department
-out = get_dep(uc2013$Title)
-tot_dep = sum_dep(out) #in a named list
 
-barplot(tot_dep, las = 2, main = 'Total in Each Defined Department, 2013')
+title_to_dep = get_dep(uc2013$Title) # departments, but ungrouped
+n_dep = apply(title_to_dep, 2, sum) # calculate the number of people in each department, including double-counting
+
+barplot(n_dep, las = 2, main = 'Total in Each Defined Department, 2013')
 
 
-tot_dep2 = c(sum(tot_dep[c('Instructor', 'Lecturer',
+grouped_n_dep = c('Faculty' = sum(n_dep[c('Instructor', 'Lecturer',
                            'Associate', 'Adjunct', 'Assistant',
                            'Academic', 'Visiting', 'Professor')]),
-             sum(tot_dep[c('Engineer', 'Technician', 'Accounting',
+             'Staff' = sum(n_dep[c('Engineer', 'Technician', 'Accounting',
                            'Nurse', 'Maintenance')]),
-             sum(tot_dep[c('Admissions', 'Administrator')]),
-             sum(tot_dep['Athletics']))
-names(tot_dep2) = c('Faculty', 'Staff', 'Admin', 'Athletics')
-barplot(tot_dep2, main = 'Total by Category, 2013') #not a good representation....too much faculty
+             'Admin' = sum(n_dep[c('Admissions', 'Administrator')]),
+             'Athletics' = sum(n_dep['Athletics']))
+
+barplot(grouped_n_dep, main = 'Total by Category, 2013') #not a good representation....too much faculty
 
 #same thing for 2014
 
