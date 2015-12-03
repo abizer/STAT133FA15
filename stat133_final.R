@@ -38,7 +38,7 @@ uc2013.total_overhead <- (uc2013 %>% summarize(total = sum(Total)))[[1, 1]] # <-
 uc2014.total_overhead <- (uc2014 %>% summarize(total = sum(Total)))[[1, 1]] # <- sum(uc2014$Total)
 
 
-if( !exists('ml'))
+if (!exists('ml'))
   source("department_regexes.R")
 
 #changed function to return a data frame - Michael
@@ -55,7 +55,7 @@ dataset_metrics <- function()
   match_dep <- function(title)
   {
    # print(title)
-    matched_departments <- sapply(ml, function(pattern) grepl(pattern, title))
+    matched_departments <- sapply(ml, function(pattern) grepl(pattern, title, perl = TRUE))
     # return the name of the first matched department, just for metrics on how much of the dataset has been tagged
     #matched <- names(matched_departments)[matched_departments[1]]
     return(
