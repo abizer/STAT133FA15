@@ -56,7 +56,7 @@ ml[['Admissions']] <- 'ADMISSIONS'
 ml[['Engineer']] <- 'ENGR'
 ml[['Technician']] <- 'TCHN'
 ml[['Student']] <- 'STDT'
-ml[[]]
+ml[[]] #getting error for this part?
 
 #changed function to return a data frame - Michael
 get_dep <- function(title)
@@ -103,6 +103,7 @@ uc2013.faculty <- uc2013.faculty.professors %>%
 
 profvinst_plot <- ggplot(uc2013.faculty, aes(x = type, y = avg_base)) + geom_boxplot()
 
+#getting error for uc2013.professors
 uc2013.professors.adjunct <- uc2013.professors %>%
   filter(Adjunct == TRUE)
 
@@ -163,13 +164,14 @@ barplot(tot_dep, las = 2, main = 'Total in Each Defined Department, 2013')
 
 
 tot_dep2 = c(sum(tot_dep[c('Instructor', 'Lecturer',
-                           'Associate', 'Adjunct', 'Assistant',
+                           'Adjunct',
                            'Academic', 'Visiting', 'Professor')]),
              sum(tot_dep[c('Engineer', 'Technician', 'Accounting',
                            'Nurse', 'Maintenance')]),
              sum(tot_dep[c('Admissions', 'Administrator')]),
-             sum(tot_dep['Athletics']))
-names(tot_dep2) = c('Faculty', 'Staff', 'Admin', 'Athletics')
+             sum(tot_dep['Athletics']),
+             sum(tot_dep['Student']))
+names(tot_dep2) = c('Faculty', 'Staff', 'Admin', 'Athletics', 'Student')
 barplot(tot_dep2, main = 'Total by Category, 2013') #not a good representation....too much faculty
 
 #same thing for 2014
@@ -178,17 +180,19 @@ out14 = get_dep(uc2014$Title)
 tot_dep14 = sum_dep(out14)
 barplot(tot_dep14, las = 2, main = 'Total in Each Defined Department, 2014')
 tot_dep14_2 = c(sum(tot_dep14[c('Instructor', 'Lecturer',
-                           'Associate', 'Adjunct', 'Assistant',
+                           'Adjunct',
                            'Academic', 'Visiting', 'Professor')]),
              sum(tot_dep14[c('Engineer', 'Technician', 'Accounting',
                            'Nurse', 'Maintenance')]),
              sum(tot_dep14[c('Admissions', 'Administrator')]),
-             sum(tot_dep14['Athletics']))
-names(tot_dep14_2) = c('Faculty', 'Staff', 'Admin', 'Athletics')
+             sum(tot_dep14['Athletics']),
+             sum(tot_dep14['Student']))
+names(tot_dep14_2) = c('Faculty', 'Staff', 'Admin', 'Athletics', 'Student')
 barplot(tot_dep14_2, main = 'Total by Category, 2014')
 
 #graphs for both years extremely similiar
 
+#99,830 persons unaccounted for, or ~41%
 
 #######################################################
 
