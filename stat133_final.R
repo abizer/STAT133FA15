@@ -95,6 +95,9 @@ uc2013.faculty.professors <- uc2013.faculty %>%
 uc2013.faculty.instructors <- uc2013.faculty %>%
   filter(Professor == FALSE) %>%
     select(-Professor, -Instructor) %>%
+  
+  
+  
       mutate(type = 'Instructor')
 
 uc2013.faculty <- uc2013.faculty.professors %>%
