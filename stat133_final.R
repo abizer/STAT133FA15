@@ -40,23 +40,36 @@ uc2014.total_overhead <- (uc2014 %>% summarize(total = sum(Total)))[[1, 1]] # <-
 #added lecturer, students, updated admin to include dean - Michael
 ml <- hash()
 ml[['Athletics']] <- '^ATH|COACH'
-ml[['Professor']] <- 'PROF[^L]'
+
 ml[['Administrator']] <- 'SUPV|MGR|ADMIN(ISTRATOR)?|DEAN'
 ml[['Academic']] <- 'ACAD(EMIC)?'
 ml[['Maintenance']] <- 'MAINT|TECH'
 ml[['Accounting']] <- 'ACCOUNT(ANT|ING)'
-ml[['Assistant']] <- 'ASST' #I think this one should be deleted, lots of assistants for different things - Michael
-ml[['Associate']] <- 'ASSOC' #might also have same problem as above (e.g. assoc dean)
-ml[['Visiting']] <- 'VIS'
-ml[['Adjunct']] <- 'ADJ'
-ml[['Lecturer']] <- 'LECT'
-ml[['Instructor']] <- 'INSTR[^U]' # don't want instrument or instruction supervisor
+#ml[['Assistant']] <- 'ASST' #I think this one should be deleted, lots of assistants for different things - Michael
+#ml[['Associate']] <- 'ASSOC' #might also have same problem as above (e.g. assoc dean)
+#ml[['Visiting']] <- 'VIS'
+#ml[['Adjunct']] <- 'ADJ'
+
+#ml[['Instructor']] <- 'INSTR[^U]' # don't want instrument or instruction supervisor
 ml[['Nurse']] <- 'NURSE'
 ml[['Admissions']] <- 'ADMISSIONS'
 ml[['Engineer']] <- 'ENGR'
 ml[['Technician']] <- 'TCHN'
-ml[['Student']] <- 'STDT'
-ml[[]] #getting error for this part?
+
+fr <- hash()
+
+fr[['Student']] <- 'STDT'
+fr[['Post Doc']] <- 'POSTDOC'
+
+fr[['Lecturer']] <- '[^E|^L]LECT[^R|^U]'
+fr[['Adjunct Professor']] <- 'ADJ PROF'
+fr[['Assistant Professor']] <- 'ASST PROF'
+fr[['Associate Professor']] <- 'ASSOC PROF'
+fr[['Assistant Adjunct Professor']] <- 'ASST ADJ PROF'
+fr[['Associate Adjunct Professor']] <- 'ASSOC ADJ PROF'
+fr[['Professor']] <- 'PROF[^L]'
+
+faculty = data.frame(sapply(fr, function(pattern) grepl(pattern, uc2013$Title)))
 
 #changed function to return a data frame - Michael
 get_dep <- function(title)
