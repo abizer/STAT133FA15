@@ -55,12 +55,11 @@ ml[['Nurse']] <- 'NURSE'
 ml[['Admissions']] <- 'ADMISSIONS'
 ml[['Engineer']] <- 'ENGR'
 ml[['Technician']] <- 'TCHN'
+fr[['Student']] <- 'STDT'
 
 fr <- hash()
 
-fr[['Student']] <- 'STDT'
 fr[['Post Doc']] <- 'POSTDOC'
-
 fr[['Lecturer']] <- '[^E|^L]LECT[^R|^U]'
 fr[['Adjunct Professor']] <- 'ADJ PROF'
 fr[['Assistant Professor']] <- 'ASST PROF'
@@ -70,7 +69,26 @@ fr[['Associate Adjunct Professor']] <- 'ASSOC ADJ PROF'
 fr[['Professor']] <- 'PROF[^L]'
 
 faculty_regex = sapply(fr, function(pattern) grepl(pattern, uc2013$Title))
-faculty = Filter(function(x) (any(x)), faculty_regex)
+faculty = data.frame(faculty_regex)
+for (i in 1:(length(colnames(faculty))-1)){
+  faculty[ , i] = sum(faculty[ , i])
+}
+faculty$Professor = sum(faculty$Professor) - sum(faculty[1, c(1, 2, 3, 4, 6)])
+faculty = faculty[1, ]
+faculty_num = as.numeric(faculty)
+names(faculty_num) = colnames(faculty)
+barplot(faculty_num, las = 2, main = 'Faculty/Instructor Breakdown 2013', 
+        xlab = 'Type of Professor', ylab = 'Total', cex.axis = 0.7)
+
+#faculty_gg = data.frame(type = colnames(faculty), total = faculty_num, row.names = NULL)
+#ggplot(data = faculty_gg) +
+  #geom_bar(aes(type)) + 
+  #xlab('Type of Professor') +
+  #ylab('Total') + 
+  #ggtitle('Faculty/Instructor Breakdown 2013')
+
+
+#faculty = Filter(function(x) (any(x)), faculty_regex)
 
 #changed function to return a data frame - Michael
 get_dep <- function(title)
