@@ -225,7 +225,8 @@ barplot(tot_dep14_2, main = 'Total by Category, 2014')
 #99,830 persons unaccounted for, or ~41%
 
 #######################################################
-
+#SORTING BY ACADEMIC AND NON-ACADEMIC#
+#######################################################
 
 
 titles = read.csv('academic-ttles-sorted-title-name.csv')
@@ -233,6 +234,7 @@ titles = titles[ , c(1, 4)]
 titles = titles[1:496, ]
 
 dupli = uc2013$Title
+#this for loop takes a while to run, probably a more efficient way
 for (i in 1:length(dupli)){
   if (dupli[i] %in% titles$Title){
     dupli[i] = as.character(titles[titles$Title == dupli[i], 2])
@@ -240,10 +242,11 @@ for (i in 1:length(dupli)){
   else (dupli[i] = 'NA')
 }
 
-#need to make a duplicate to preserve non-academic titles
+#need to make a duplicate to preserve grouped academic titles
 dupli2 = uc2013
+dupli2$Title = dupli
 
-na_indexes = grep('NA', dupli2$Title)
+na_indexes = grep('NA', dupli)
 non_acad_2013 = uc2013[na_indexes, ]
 acad_2013 = dupli2[-na_indexes, ]
 
