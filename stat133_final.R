@@ -232,6 +232,13 @@ barplot(tot_dep14_2, main = 'Total by Category, 2014')
 titles = read.csv('academic-ttles-sorted-title-name.csv')
 titles = titles[ , c(1, 4)]
 titles = titles[1:496, ]
+titles$Title = as.character(titles$Title)
+
+#fixing some problems
+titles$Title[grep('PROF OF CLIN- FY', titles$Title)] = 'PROF OF CLIN-FY'
+titles$Title[grep("RES PROF-MILLER INST -AY", titles$Title)] = "RES PROF-MILLER INST-AY" 
+titles$Title[grep("PROF EMERITUS \\(WOS\\)", titles$Title)] = "PROF EMERITUS(WOS)" 
+titles$Title[grep("LECT SOE-EMERITUS \\(WOS\\)", titles$Title)] = "LECT SOE-EMERITUS(WOS)" 
 
 dupli = uc2013$Title
 #this for loop takes a while to run, probably a more efficient way
@@ -246,11 +253,13 @@ for (i in 1:length(dupli)){
 dupli2 = uc2013
 dupli2$Title = dupli
 
-na_indexes = grep('NA', dupli)
+na_indexes = grep('\\bNA\\b', dupli)
 non_acad_2013 = uc2013[na_indexes, ]
 acad_2013 = dupli2[-na_indexes, ]
 
-
+#acad_2013 excludes visiting and recalled professors/lecturers, also 'RESEARCH PROFESSOR'
+#and 'PROFESSOR-FY-GENCOMP'
+#REMINDER: FIX GSHIP ALSO
 
 
 
