@@ -60,12 +60,10 @@ fr[['Student']] <- 'STDT'
 fr <- hash()
 
 fr[['Post Doc']] <- 'POSTDOC'
-fr[['Lecturer']] <- '[^E|^L]LECT[^R|^U]'
-fr[['Adjunct Professor']] <- 'ADJ PROF'
-fr[['Assistant Professor']] <- 'ASST PROF'
-fr[['Associate Professor']] <- 'ASSOC PROF'
-fr[['Assistant Adjunct Professor']] <- 'ASST ADJ PROF'
-fr[['Associate Adjunct Professor']] <- 'ASSOC ADJ PROF'
+fr[['Lecturer']] <- 'LECT[ -]'
+fr[['Adjunct']] <- 'ADJ (PROF|INSTR)'
+fr[['Assistant']] <- 'ASST PROF'
+fr[['Associate']] <- 'ASSOC PROF'
 fr[['Professor']] <- 'PROF[^L]'
 
 faculty_regex = sapply(fr, function(pattern) grepl(pattern, uc2013$Title))
@@ -73,7 +71,7 @@ faculty = data.frame(faculty_regex)
 for (i in 1:(length(colnames(faculty))-1)){
   faculty[ , i] = sum(faculty[ , i])
 }
-faculty$Professor = sum(faculty$Professor) - sum(faculty[1, c(1, 2, 3, 4, 6)])
+faculty$Professor = sum(faculty$Professor) - sum(faculty[1, c(1, 3, 4)])
 faculty = faculty[1, ]
 faculty_num = as.numeric(faculty)
 names(faculty_num) = colnames(faculty)
@@ -81,8 +79,8 @@ barplot(faculty_num, las = 2, main = 'Faculty/Instructor Breakdown 2013',
         xlab = 'Type of Professor', ylab = 'Total', cex.axis = 0.7)
 
 #faculty_gg = data.frame(type = colnames(faculty), total = faculty_num, row.names = NULL)
-#ggplot(data = faculty_gg) +
-  #geom_bar(aes(type)) + 
+#ggplot(data = faculty) +
+  #geom_bar() + 
   #xlab('Type of Professor') +
   #ylab('Total') + 
   #ggtitle('Faculty/Instructor Breakdown 2013')
@@ -227,5 +225,29 @@ barplot(tot_dep14_2, main = 'Total by Category, 2014')
 #99,830 persons unaccounted for, or ~41%
 
 #######################################################
+
+
+
+titles = read.csv('academic-ttles-sorted-title-name.csv')
+titles = titles[ , c(1, 4)]
+titles = titles[1:496, ]
+
+dupli = uc2013$Title
+for (i in 1:length(dupli)){
+  if (dupli[i] %in% titles$Title){
+    dupli[i] = as.character(titles[titles$Title == dupli[i], 2])
+  }
+  else (dupli[i] = 'NA')
+}
+
+#need to make a duplicate to preserve non-academic titles
+dupli2 = uc2013
+
+na_indexes = grep('NA', dupli2$Title)
+non_acad_2013 = uc2013[na_indexes, ]
+acad_2013 = dupli2[-na_indexes, ]
+
+
+
 
 
