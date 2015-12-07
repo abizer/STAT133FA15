@@ -387,8 +387,39 @@ ggplot(data = df_tot, aes(year)) +
 #Also graphing difference increase in undergraduate enrollment
 #Will have to do this as percentages
 #source: http://finreports.universityofcalifornia.edu/index.php?file=13-14/pdf/fullreport-1314.pdf
-enroll = c(191369, 183498, 184562, 179581)
+enroll = c(179581, 184562, 183498, 191369)
+names(enroll) = c('2011', '2012', '2013', '2014')
 diff_enroll = c(184562-179581, 183498-184562, 191369-183498)
+names(diff_enroll) = c('2011-12', '2012-13', '2013-14')
+percent_enroll = diff_enroll[2:3] / enroll[2:3]
+percent_enroll = c(0, percent_enroll)
+
+diff_acad = c(nrow(acad_2013)-nrow(acad_2012), nrow(acad_2014)-nrow(acad_2013))
+names(diff_acad) = c('2012-13', '2013-14')
+percent_acad = diff_acad / c(nrow(acad_2012), nrow(acad_2013))
+percent_acad = c(0, percent_acad)
+
+diff_non = c(nrow(non_acad_2013)-nrow(non_acad_2012), nrow(non_acad_2014)-nrow(non_acad_2013))
+names(diff_non) = c('2012-13', '2013-14')
+percent_non = diff_non / c(nrow(non_acad_2012), nrow(non_acad_2013))
+percent_non = c(0, percent_non)
+
+df_perc = data.frame(enroll = percent_enroll, acad = percent_acad, 
+                     non = percent_non, total = percent_acad+percent_non, 
+                     year = c(2012:2014), row.names = NULL)
+
+ggplot(data = df_perc, aes(year)) +
+  geom_point(aes(y = acad, color = 'acad')) +
+  geom_point(aes(y = non, color = 'non')) +
+  geom_point(aes(y = total, color = 'total')) +
+  geom_point(aes(y = enroll, color = 'enroll')) +
+  geom_line(aes(y = acad, color = 'acad')) +
+  geom_line(aes(y = non, color = 'non')) +
+  geom_line(aes(y = total, color = 'total')) +
+  geom_line(aes(y = enroll, color = 'enroll')) +
+  ggtitle('Percent Increase in Enrollment Compared to Faculty/Staff (2012-14)') +
+  xlab('Year') +
+  ylab('Percent')
 
 #######################################
 #EXPLORATORY ANALYSIS#
