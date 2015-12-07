@@ -351,8 +351,9 @@ acad_2011 = dupli2_11[-na_indexes, ]
 t_acad = c(sum(acad_2012$Total), sum(acad_2013$Total), sum(acad_2014$Total))
 t_non = c(sum(non_acad_2012$Total), sum(non_acad_2013$Total), sum(non_acad_2014$Total))
 df_tot = data.frame(year = c(2012, 2013, 2014), acad = t_acad, non = t_non)
+df_tot$dif = df_tot$non - df_tot$acad
 
-
+#Total Overhead over Time
 ggplot(data = df_tot, aes(year)) +
   geom_point(aes(y = acad, color = 'acad')) +
   geom_point(aes(y = non, color = 'non')) +
@@ -360,10 +361,34 @@ ggplot(data = df_tot, aes(year)) +
   geom_line(aes(y = non, color = 'non')) +
   ggtitle('Total Overhead by Academic and Non-Academic (2012-14)') +
   xlab('Year') +
-  ylab('Total') +
-  scale_y_continuous(labels = comma)
+  ylab('Total')
   
+#Difference in Overhead
+ggplot(data = df_tot, aes(year)) +
+  geom_point(aes(y = dif, color = 'dif')) +
+  geom_line(aes(y = dif, color = 'dif')) +
+  ggtitle('Difference between Academic and Non-Academic Total Overhead (2012-14)') +
+  xlab('Year') +
+  ylab('Difference')
 
+#Two graphs above combined
+ggplot(data = df_tot, aes(year)) +
+  geom_point(aes(y = acad, color = 'acad')) +
+  geom_point(aes(y = non, color = 'non')) +
+  geom_point(aes(y = dif, color = 'dif')) +
+  geom_line(aes(y = acad, color = 'acad')) +
+  geom_line(aes(y = non, color = 'non')) +
+  geom_line(aes(y = dif, color = 'dif')) +
+  ggtitle('Total Overhead by Academic and Non-Academic (2012-14)') +
+  xlab('Year') +
+  ylab('Total/Difference (in USD)')
+
+
+#Also graphing difference increase in undergraduate enrollment
+#Will have to do this as percentages
+#source: http://finreports.universityofcalifornia.edu/index.php?file=13-14/pdf/fullreport-1314.pdf
+enroll = c(191369, 183498, 184562, 179581)
+diff_enroll = c(184562-179581, 183498-184562, 191369-183498)
 
 #######################################
 #EXPLORATORY ANALYSIS#
