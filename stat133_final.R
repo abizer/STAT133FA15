@@ -287,6 +287,82 @@ acad_2013 = dupli2[-na_indexes, ]
 download.file('http://transparentcalifornia.com/export/university-of-california-2012.csv', 'university-of-california-2012.csv')
 download.file('http://transparentcalifornia.com/export/university-of-california-2011.csv', 'university-of-california-2011.csv')
 
+dupli_14 = uc2014$Title
+for (i in 1:length(dupli_14)){
+  if (dupli_14[i] %in% titles$Title){
+    dupli_14[i] = as.character(titles[titles$Title == dupli_14[i], 2])
+  }
+  else (dupli_14[i] = 'NA')
+}
+
+dupli2_14 = uc2014
+dupli2_14$Category = dupli_14
+
+na_indexes = grep('\\bNA\\b', dupli_14)
+non_acad_2014 = uc2014[na_indexes, ]
+non_acad_2014$Category = 'NON-ACADEMIC' #so both dfs have same # of columns
+acad_2014 = dupli2_14[-na_indexes, ]
+
+
+
+dupli_12 = uc2012$Title
+for (i in 1:length(dupli_12)){
+  if (dupli_12[i] %in% titles$Title){
+    dupli_12[i] = as.character(titles[titles$Title == dupli_12[i], 2])
+  }
+  else (dupli_12[i] = 'NA')
+}
+
+dupli2_12 = uc2012
+dupli2_12$Category = dupli_12
+
+na_indexes = grep('\\bNA\\b', dupli_12)
+non_acad_2012 = uc2012[na_indexes, ]
+non_acad_2012$Category = 'NON-ACADEMIC' #so both dfs have same # of columns
+acad_2012 = dupli2_12[-na_indexes, ]
+
+
+
+
+#2011 data uses different job titles (e.g. PROFESSOR-HCOMP instead of PROF-HCOMP) so can't use
+dupli_11 = uc2011$Title
+for (i in 1:length(dupli_11)){
+  if (dupli_11[i] %in% titles$Title){
+    dupli_11[i] = as.character(titles[titles$Title == dupli_11[i], 2])
+  }
+  else (dupli_11[i] = 'NA')
+}
+
+dupli2_11 = uc2011
+dupli2_11$Category = dupli_11
+
+na_indexes = grep('\\bNA\\b', dupli_11)
+non_acad_2011 = uc2011[na_indexes, ]
+non_acad_2011$Category = 'NON-ACADEMIC' #so both dfs have same # of columns
+acad_2011 = dupli2_11[-na_indexes, ]
+
+#######################################
+#EXPLORATORY ANALYSIS#
+#######################################
+tenure_prof = acad_2013$Total[acad_2013$Category == 'PROFESSORIAL-TENURE']
+qplot(x = x, geom = 'density', main = 'Distribution of Total Pay of Tenured Professors (2013)',
+      xlab = 'Total Pay')
+acad_2013[acad_2013$Total == max(acad_2013$Total), ] #professor making the most money
+
+avg_pay = tapply(acad_2013$Total, acad_2013$Category, mean)
+avg_pay = sort(avg_pay, decreasing = TRUE)
+avg_pay
+
+#smaller groupings: LECT, ADMIN, PROF, GSR/TA/POSTDOC
+copy = acad_2013
+copy$Category[grep('LECTURER', copy$Category)] = 'LECTURER'
+copy$Category[grep('DEAN|ACADEMIC|DIRECTOR|PROVOST', copy$Category)] = 'ADMINISTRATOR'
+copy$Category[grep('POSTDOCTORAL|INSTRUCTIONAL|GRADUATE|TEACHING', copy$Category)] = 'GSR/TA/POSTDOC'
+copy$Category[grep('PROF', copy$Category)] = 'PROFESSOR'
+x = tapply(copy$Total, copy$Category, mean)
+y = x[c('ADMINISTRATOR', 'LECTURER', 'PROFESSOR', 'GSR/TA/POSTDOC')]
+barplot(sort(y))
+
 
 
 #######################################
