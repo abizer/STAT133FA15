@@ -13,9 +13,13 @@ uctca_colnames <- c("Name", "Title", "Base", "Overtime", "Other", "Benefits", "S
 setwd('~/Dropbox/College/Freshman Year/Fall Semester/STAT 133/project')
 
 #restrict Total more? - Michael
+uc2011 <- read_csv("university-of-california-2011.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+uc2012 <- read_csv("university-of-california-2012.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
 uc2013 <- read_csv("university-of-california-2013.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
 uc2014 <- read_csv("university-of-california-2014.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
 
+attributes(uc2011)$problems <- NULL
+attributes(uc2012)$problems <- NULL
 attributes(uc2013)$problems <- NULL # problems pollute the dataset
 attributes(uc2014)$problems <- NULL
 
@@ -236,6 +240,7 @@ titles$Title = as.character(titles$Title)
 
 #fixing some problems
 #problems found by grep-ing 'PROF', 'GSHIP', etc. in non_acad
+#problems usually from spaces and dashes
 titles$Title[grep('PROF OF CLIN- FY', titles$Title)] = 'PROF OF CLIN-FY'
 titles$Title[grep("RES PROF-MILLER INST -AY", titles$Title)] = "RES PROF-MILLER INST-AY" 
 titles$Title[grep("PROF EMERITUS \\(WOS\\)", titles$Title)] = "PROF EMERITUS(WOS)" 
@@ -277,4 +282,20 @@ acad_2013 = dupli2[-na_indexes, ]
 #'COORD', 'TEACHER' series also messed up
 #should include 'DEAN' stuffs too, 307 in non_acad; also LIBRARIAN
 
+
+###########SAME THING FOR 2011, 2012, 2014##############
+download.file('http://transparentcalifornia.com/export/university-of-california-2012.csv', 'university-of-california-2012.csv')
+download.file('http://transparentcalifornia.com/export/university-of-california-2011.csv', 'university-of-california-2011.csv')
+
+
+
+#######################################
+#CAL STATE DATA#
+#######################################
+
+cal_state <- read.csv('2014-university-system.csv')
+cal_state <- cal_state[cal_state$Agency == 'California State University', ]
+colnames(cal_state) = uctca_colnames
+length(unique(grep('FACULTY|READER|ACADEMIC|LECTURER', cal_state$Title, value = TRUE)))
+#does not use same titles as uc data, can check for similiar subgrouping on internets
 
