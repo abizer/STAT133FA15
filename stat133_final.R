@@ -193,5 +193,77 @@ barplot(tot_dep14_2, main = 'Total by Category, 2014')
 
 
 #######################################################
+#SORTING BY ACADEMIC AND NON-ACADEMIC#
+#######################################################
+
+
+titles = read_csv('academic-ttles-sorted-title-name.csv')
+titles = titles[-497, c('Title', 'CTO Name')]
+#titles = titles[-497, ]
+#titles$Title = as.character(titles$Title)
+
+#fixing some problems
+#problems found by grep-ing 'PROF', 'GSHIP', etc. in non_acad
+titles$Title[grep('PROF OF CLIN- FY', titles$Title)] = 'PROF OF CLIN-FY'
+titles$Title[grep("RES PROF-MILLER INST -AY", titles$Title)] = "RES PROF-MILLER INST-AY" 
+titles$Title[grep("PROF EMERITUS \\(WOS\\)", titles$Title)] = "PROF EMERITUS(WOS)" 
+titles$Title[grep("LECT SOE-EMERITUS \\(WOS\\)", titles$Title)] = "LECT SOE-EMERITUS(WOS)" 
+
+titles$Title[grep("ASSOC IN            - AY-1/9-GSHIP" , titles$Title)] = "ASSOC IN __ -AY-1/9-GSHIP"
+titles$Title[grep("ASSOC IN            -AY-1/9-NON-GSHIP", titles$Title)] = "ASSOC IN__-AY- 1/9 -NON-GSHIP"
+titles$Title[grep("ASSOC IN            -AY-GSHIP" , titles$Title)] = "ASSOC IN ____-AY-GSHIP" 
+titles$Title[grep("READER - GSHIP", titles$Title)] = "READER-GSHIP" 
+titles$Title[grep("REMD TUT I-NON-GSHIP/NON REP", titles$Title)] = "REMD TUT I-NON GSHIP/NON REP"
+titles$Title[grep("REMD TUT I-NON-GSHIP", titles$Title)] = "REMD TUT I-NON GSHIP"
+titles$Title[grep("READER - NON GSHIP", titles$Title)] = "READER-NON GSHIP"
+titles$Title[grep("TUT--NON STDNT/NON REP", titles$Title)] = "TUT-NON STDNT/NON REP"
+titles$Title[grep("READER - NON STDNT", titles$Title)] = "READER-NON STDNT"
+
+
+unique_titles <- unique(uc2013$Title)
+title_map <- list()
+
+#this for loop takes a while to run, probably a more efficient way
+#getting warnings for this, didn't before, could be line 135 (as.character...)?
+#seems to be working fine though
+for (i in unique_titles) {
+  title_map[[i]] <- as.character(titles[titles$Title == i, 'CTO Name'])
+}
+
+title_map <- sapply(title_map, function(x) ifelse(x == "character(0)", NA, x))
+
+#title_df <- data.frame(Title = names(title_map), Department = title_map, row.names = NULL, stringsAsFactors = FALSE)
+
+uc2013.departments <- uc2013 %>% mutate(Department = sapply(Title, function(x) title_map[[x]]))
+
+uc2013.by_department <- uc2013.departments %>% 
+  group_by(Department) %>% 
+    summarize(avg = mean(Total)) %>% 
+     # arrange(avg)
+        filter(avg > 40000 & !is.na(Department)) %>%
+      mutate(Department = reorder(Department, avg))
+
+group_comp_all_plot <- ggplot(uc2013.by_department, aes(x = Department, y = avg)) + 
+  geom_bar(stat = 'identity') + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+group_comp_all_plot + geom_vline(aes(xintercept = sapply(c(1, 2, 3) * 1e5, function(x) (which(sort(uc2013.by_department$avg) > x)[1]))), 
+                                 linetype = 1, color = 'black')
+                                                             
+
+#need to make a duplicate to preserve grouped academic titles
+dupli2 = uc2013
+dupli2$Category = dupli
+
+na_indexes = grep('\\bNA\\b', dupli)
+non_acad_2013 = uc2013[na_indexes, ]
+non_acad_2013$Category = 'NON-ACADEMIC' #so both dfs have same # of columns
+acad_2013 = dupli2[-na_indexes, ]
+
+#acad_2013 excludes visiting and recalled professors/lecturers, also 'RESEARCH PROFESSOR'
+#and 'PROFESSOR-FY-GENCOMP'
+#left 'SPECIAL READER...UCLA' in non_acad
+#'COORD', 'TEACHER' series also messed up
+#should include 'DEAN' stuffs too, 307 in non_acad; also LIBRARIAN
 
 
