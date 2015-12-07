@@ -56,16 +56,10 @@ ml[['Nurse']] <- 'NURSE'
 ml[['Admissions']] <- 'ADMISSIONS'
 ml[['Engineer']] <- 'ENGR'
 ml[['Technician']] <- 'TCHN'
-<<<<<<< HEAD
 
 fr <- hash()
 fr[['Student']] <- 'STDT'
-=======
-fr[['Student']] <- 'STDT'
 
-fr <- hash()
-
->>>>>>> michael
 fr[['Post Doc']] <- 'POSTDOC'
 fr[['Lecturer']] <- 'LECT[ -]'
 fr[['Adjunct']] <- 'ADJ (PROF|INSTR)'
@@ -87,17 +81,11 @@ barplot(faculty_num, las = 2, main = 'Faculty/Instructor Breakdown 2013',
 
 #faculty_gg = data.frame(type = colnames(faculty), total = faculty_num, row.names = NULL)
 #ggplot(data = faculty) +
-<<<<<<< HEAD
-#geom_bar() + 
-#xlab('Type of Professor') +
-#ylab('Total') + 
-#ggtitle('Faculty/Instructor Breakdown 2013')
-=======
+
   #geom_bar() + 
   #xlab('Type of Professor') +
   #ylab('Total') + 
   #ggtitle('Faculty/Instructor Breakdown 2013')
->>>>>>> michael
 
 
 #faculty = Filter(function(x) (any(x)), faculty_regex)
@@ -224,7 +212,6 @@ out14 = get_dep(uc2014$Title)
 tot_dep14 = sum_dep(out14)
 barplot(tot_dep14, las = 2, main = 'Total in Each Defined Department, 2014')
 tot_dep14_2 = c(sum(tot_dep14[c('Instructor', 'Lecturer',
-<<<<<<< HEAD
                                 'Adjunct',
                                 'Academic', 'Visiting', 'Professor')]),
                 sum(tot_dep14[c('Engineer', 'Technician', 'Accounting',
@@ -232,15 +219,6 @@ tot_dep14_2 = c(sum(tot_dep14[c('Instructor', 'Lecturer',
                 sum(tot_dep14[c('Admissions', 'Administrator')]),
                 sum(tot_dep14['Athletics']),
                 sum(tot_dep14['Student']))
-=======
-                           'Adjunct',
-                           'Academic', 'Visiting', 'Professor')]),
-             sum(tot_dep14[c('Engineer', 'Technician', 'Accounting',
-                           'Nurse', 'Maintenance')]),
-             sum(tot_dep14[c('Admissions', 'Administrator')]),
-             sum(tot_dep14['Athletics']),
-             sum(tot_dep14['Student']))
->>>>>>> michael
 names(tot_dep14_2) = c('Faculty', 'Staff', 'Admin', 'Athletics', 'Student')
 barplot(tot_dep14_2, main = 'Total by Category, 2014')
 
@@ -260,10 +238,9 @@ titles$Title = as.character(titles$Title)
 
 #fixing some problems
 #problems found by grep-ing 'PROF', 'GSHIP', etc. in non_acad
-<<<<<<< HEAD
-=======
+
 #problems usually from spaces and dashes
->>>>>>> michael
+
 titles$Title[grep('PROF OF CLIN- FY', titles$Title)] = 'PROF OF CLIN-FY'
 titles$Title[grep("RES PROF-MILLER INST -AY", titles$Title)] = "RES PROF-MILLER INST-AY" 
 titles$Title[grep("PROF EMERITUS \\(WOS\\)", titles$Title)] = "PROF EMERITUS(WOS)" 
@@ -293,13 +270,7 @@ for (i in 1:length(dupli)){
 #need to make a duplicate to preserve grouped academic titles
 dupli2 = uc2013
 dupli2$Category = dupli
-<<<<<<< HEAD
 
-na_indexes = grep('\\bNA\\b', dupli)
-non_acad_2013 = uc2013[na_indexes, ]
-non_acad_2013$Category = 'NON-ACADEMIC' #so both dfs have same # of columns
-acad_2013 = dupli2[-na_indexes, ]
-=======
 
 na_indexes = grep('\\bNA\\b', dupli)
 non_acad_2013 = uc2013[na_indexes, ]
@@ -328,7 +299,7 @@ cal_state <- cal_state[cal_state$Agency == 'California State University', ]
 colnames(cal_state) = uctca_colnames
 length(unique(grep('FACULTY|READER|ACADEMIC|LECTURER', cal_state$Title, value = TRUE)))
 #does not use same titles as uc data, can check for similiar subgrouping on internets
->>>>>>> michael
+
 
 #acad_2013 excludes visiting and recalled professors/lecturers, also 'RESEARCH PROFESSOR'
 #and 'PROFESSOR-FY-GENCOMP'
