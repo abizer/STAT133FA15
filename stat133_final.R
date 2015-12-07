@@ -21,6 +21,7 @@ attributes(uc2014)$problems <- NULL
 employee_change <- nrow(uc2014) - nrow(uc2013)
 #new_employees <- anti_join(uc2014, uc2013, by = 'Name')
 
+#why distinct? this excludes ~80k with apparently same name (which actually seems odd there's so many) - Michael
 uc2013.names <- uc2013 %>% select(Name) %>% distinct() %>% mutate(Name = toupper(Name)) %>%  arrange(desc(Name))
 uc2014.names <- uc2014 %>% select(Name) %>% distinct() %>% arrange(desc(Name))
 
@@ -32,30 +33,64 @@ uc2014.titles <- uc2014 %>% select(Title) %>% distinct()
 
 unique_titles <- merge(uc2013.titles, uc2014.titles)
 
-uc2013.total_overhead <- (uc2013 %>% summarize(total = sum(Total)))[[1, 1]]
-uc2014.total_overhead <- (uc2014 %>% summarize(total = sum(Total)))[[1, 1]]
+uc2013.total_overhead <- (uc2013 %>% summarize(total = sum(Total)))[[1, 1]] # <- sum(uc2013$Total)
+uc2014.total_overhead <- (uc2014 %>% summarize(total = sum(Total)))[[1, 1]] # <- sum(uc2014$Total)
 
+#added lecturer, students, updated admin to include dean - Michael
 ml <- hash()
 ml[['Athletics']] <- '^ATH|COACH'
-ml[['Professor']] <- 'PROF'
-ml[['Administrator']] <- 'SUPV|MGR|ADMIN(ISTRATOR)?'
+
+ml[['Administrator']] <- 'SUPV|MGR|ADMIN(ISTRATOR)?|DEAN'
 ml[['Academic']] <- 'ACAD(EMIC)?'
 ml[['Maintenance']] <- 'MAINT|TECH'
 ml[['Accounting']] <- 'ACCOUNT(ANT|ING)'
-ml[['Assistant']] <- 'ASST'
-ml[['Associate']] <- 'ASSOC'
-ml[['Visiting']] <- 'VIS'
-ml[['Adjunct']] <- 'ADJ'
-ml[['Instructor']] <- 'INSTR'
+#ml[['Assistant']] <- 'ASST' #I think this one should be deleted, lots of assistants for different things - Michael
+#ml[['Associate']] <- 'ASSOC' #might also have same problem as above (e.g. assoc dean)
+#ml[['Visiting']] <- 'VIS'
+#ml[['Adjunct']] <- 'ADJ'
+
+#ml[['Instructor']] <- 'INSTR[^U]' # don't want instrument or instruction supervisor
 ml[['Nurse']] <- 'NURSE'
 ml[['Admissions']] <- 'ADMISSIONS'
 ml[['Engineer']] <- 'ENGR'
 ml[['Technician']] <- 'TCHN'
-ml[[]]
 
+fr <- hash()
+fr[['Student']] <- 'STDT'
+fr[['Post Doc']] <- 'POSTDOC'
+fr[['Lecturer']] <- 'LECT[ -]'
+fr[['Adjunct']] <- 'ADJ (PROF|INSTR)'
+fr[['Assistant']] <- 'ASST PROF'
+fr[['Associate']] <- 'ASSOC PROF'
+fr[['Professor']] <- 'PROF[^L]'
+
+faculty_regex = sapply(fr, function(pattern) grepl(pattern, uc2013$Title))
+faculty = data.frame(faculty_regex)
+for (i in 1:(length(colnames(faculty))-1)){
+  faculty[ , i] = sum(faculty[ , i])
+}
+faculty$Professor = sum(faculty$Professor) - sum(faculty[1, c(1, 3, 4)])
+faculty = faculty[1, ]
+faculty_num = as.numeric(faculty)
+names(faculty_num) = colnames(faculty)
+barplot(faculty_num, las = 2, main = 'Faculty/Instructor Breakdown 2013', 
+        xlab = 'Type of Professor', ylab = 'Total', cex.axis = 0.7)
+
+#faculty_gg = data.frame(type = colnames(faculty), total = faculty_num, row.names = NULL)
+#ggplot(data = faculty) +
+#geom_bar() + 
+#xlab('Type of Professor') +
+#ylab('Total') + 
+#ggtitle('Faculty/Instructor Breakdown 2013')
+
+
+#faculty = Filter(function(x) (any(x)), faculty_regex)
+
+#changed function to return a data frame - Michael
 get_dep <- function(title)
 { # sapply matches regexes against the title, second line collects matched department names
-  out <- sapply(ml, function(pattern) grepl(pattern, title))
+  out = sapply(ml, function(pattern) grepl(pattern, title))
+  return(data.frame(out))
   #out <- names(out)[out]
   #ifelse(!is.null(out), out, 'Undetermined')
 }
@@ -67,15 +102,15 @@ uc2013.employee_stats <- uc2013 %>%
             avg_benefit = mean(Benefits),
             avg_total = mean(Total),
             group_total = sum(Total))
-  
-  #uc2013.employee_stats <- uc2013.employee_stats %>%
-  #group_by(Title) %>%
-  #mutate(department = get_dep(Title))
-  
-  departments <- sapply(ml, function(pat) grepl(pat, uc2013.employee_stats$Title))
+
+#uc2013.employee_stats <- uc2013.employee_stats %>%
+#group_by(Title) %>%
+#mutate(department = get_dep(Title))
+
+departments <- sapply(ml, function(pat) grepl(pat, uc2013.employee_stats$Title))
 
 uc2013.employee_stats.deps <- cbind(uc2013.employee_stats, departments)
-  
+
 uc2013.faculty <- uc2013.employee_stats.deps %>%
   filter(Professor == TRUE | Instructor == TRUE) %>%
   select(Title, n, avg_base, avg_benefit, avg_total, group_total, Professor, Instructor) %>%
@@ -96,6 +131,7 @@ uc2013.faculty <- uc2013.faculty.professors %>%
 
 profvinst_plot <- ggplot(uc2013.faculty, aes(x = type, y = avg_base)) + geom_boxplot()
 
+#getting error for uc2013.professors
 uc2013.professors.adjunct <- uc2013.professors %>%
   filter(Adjunct == TRUE)
 
@@ -130,6 +166,8 @@ uc2014.employee_stats <- uc2014 %>%
             avg_total = mean(Total),
             group_total = sum(Total)) %>%
   mutate(department = guess_department(Title))
+
+
 
 ###############################################################
 #This section defines totals by department/category - Michael
@@ -184,4 +222,55 @@ barplot(tot_dep14_2, main = 'Total by Category, 2014')
 
 #99,830 persons unaccounted for, or ~41%
 
-######################################################
+#######################################################
+#SORTING BY ACADEMIC AND NON-ACADEMIC#
+#######################################################
+
+
+titles = read.csv('academic-ttles-sorted-title-name.csv')
+titles = titles[ , c(1, 4)]
+titles = titles[1:496, ]
+titles$Title = as.character(titles$Title)
+
+#fixing some problems
+#problems found by grep-ing 'PROF', 'GSHIP', etc. in non_acad
+titles$Title[grep('PROF OF CLIN- FY', titles$Title)] = 'PROF OF CLIN-FY'
+titles$Title[grep("RES PROF-MILLER INST -AY", titles$Title)] = "RES PROF-MILLER INST-AY" 
+titles$Title[grep("PROF EMERITUS \\(WOS\\)", titles$Title)] = "PROF EMERITUS(WOS)" 
+titles$Title[grep("LECT SOE-EMERITUS \\(WOS\\)", titles$Title)] = "LECT SOE-EMERITUS(WOS)" 
+
+titles$Title[grep("ASSOC IN            - AY-1/9-GSHIP" , titles$Title)] = "ASSOC IN __ -AY-1/9-GSHIP"
+titles$Title[grep("ASSOC IN            -AY-1/9-NON-GSHIP", titles$Title)] = "ASSOC IN__-AY- 1/9 -NON-GSHIP"
+titles$Title[grep("ASSOC IN            -AY-GSHIP" , titles$Title)] = "ASSOC IN ____-AY-GSHIP" 
+titles$Title[grep("READER - GSHIP", titles$Title)] = "READER-GSHIP" 
+titles$Title[grep("REMD TUT I-NON-GSHIP/NON REP", titles$Title)] = "REMD TUT I-NON GSHIP/NON REP"
+titles$Title[grep("REMD TUT I-NON-GSHIP", titles$Title)] = "REMD TUT I-NON GSHIP"
+titles$Title[grep("READER - NON GSHIP", titles$Title)] = "READER-NON GSHIP"
+titles$Title[grep("TUT--NON STDNT/NON REP", titles$Title)] = "TUT-NON STDNT/NON REP"
+titles$Title[grep("READER - NON STDNT", titles$Title)] = "READER-NON STDNT"
+
+dupli = uc2013$Title
+#this for loop takes a while to run, probably a more efficient way
+#getting warnings for this, didn't before, could be line 135 (as.character...)?
+#seems to be working fine though
+for (i in 1:length(dupli)){
+  if (dupli[i] %in% titles$Title){
+    dupli[i] = as.character(titles[titles$Title == dupli[i], 2])
+  }
+  else (dupli[i] = 'NA')
+}
+
+#need to make a duplicate to preserve grouped academic titles
+dupli2 = uc2013
+dupli2$Category = dupli
+
+na_indexes = grep('\\bNA\\b', dupli)
+non_acad_2013 = uc2013[na_indexes, ]
+non_acad_2013$Category = 'NON-ACADEMIC' #so both dfs have same # of columns
+acad_2013 = dupli2[-na_indexes, ]
+
+#acad_2013 excludes visiting and recalled professors/lecturers, also 'RESEARCH PROFESSOR'
+#and 'PROFESSOR-FY-GENCOMP'
+#left 'SPECIAL READER...UCLA' in non_acad
+#'COORD', 'TEACHER' series also messed up
+#should include 'DEAN' stuffs too, 307 in non_acad; also LIBRARIAN
