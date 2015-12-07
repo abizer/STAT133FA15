@@ -6,6 +6,7 @@ library(ggplot2)
 library(dplyr)
 library(stringr)
 library(hash)
+library(scales)
 
 uctca_colnames <- c("Name", "Title", "Base", "Overtime", "Other", "Benefits", "Subtotal", "Total", "Year", "Notes", "Agency")
 
@@ -244,7 +245,12 @@ titles$Title = as.character(titles$Title)
 titles$Title[grep('PROF OF CLIN- FY', titles$Title)] = 'PROF OF CLIN-FY'
 titles$Title[grep("RES PROF-MILLER INST -AY", titles$Title)] = "RES PROF-MILLER INST-AY" 
 titles$Title[grep("PROF EMERITUS \\(WOS\\)", titles$Title)] = "PROF EMERITUS(WOS)" 
-titles$Title[grep("LECT SOE-EMERITUS \\(WOS\\)", titles$Title)] = "LECT SOE-EMERITUS(WOS)" 
+titles$Title[grep("LECT SOE-EMERITUS \\(WOS\\)", titles$Title)] = "LECT SOE-EMERITUS(WOS)"
+
+#forgot what I'm doing with this
+#titles$Title[grep('PROF.*RECALL', titles$Title)] = "RECALLED PROFESSOR"
+#titles$Title[grep('VST.*PROF|VSTG.*PROF', titles$Title)] = "VISTING PROFESSOR"
+#titles$Title[grep('RESEARCH PROFESSOR', titles$Title)] = "PROFESSIONAL RESEARCH-REGULAR"
 
 titles$Title[grep("ASSOC IN            - AY-1/9-GSHIP" , titles$Title)] = "ASSOC IN __ -AY-1/9-GSHIP"
 titles$Title[grep("ASSOC IN            -AY-1/9-NON-GSHIP", titles$Title)] = "ASSOC IN__-AY- 1/9 -NON-GSHIP"
@@ -276,8 +282,6 @@ non_acad_2013 = uc2013[na_indexes, ]
 non_acad_2013$Category = 'NON-ACADEMIC' #so both dfs have same # of columns
 acad_2013 = dupli2[-na_indexes, ]
 
-#acad_2013 excludes visiting and recalled professors/lecturers, also 'RESEARCH PROFESSOR'
-#and 'PROFESSOR-FY-GENCOMP'
 #left 'SPECIAL READER...UCLA' in non_acad
 #'COORD', 'TEACHER' series also messed up
 #should include 'DEAN' stuffs too, 307 in non_acad; also LIBRARIAN
@@ -340,6 +344,26 @@ na_indexes = grep('\\bNA\\b', dupli_11)
 non_acad_2011 = uc2011[na_indexes, ]
 non_acad_2011$Category = 'NON-ACADEMIC' #so both dfs have same # of columns
 acad_2011 = dupli2_11[-na_indexes, ]
+
+
+
+
+t_acad = c(sum(acad_2012$Total), sum(acad_2013$Total), sum(acad_2014$Total))
+t_non = c(sum(non_acad_2012$Total), sum(non_acad_2013$Total), sum(non_acad_2014$Total))
+df_tot = data.frame(year = c(2012, 2013, 2014), acad = t_acad, non = t_non)
+
+
+ggplot(data = df_tot, aes(year)) +
+  geom_point(aes(y = acad, color = 'acad')) +
+  geom_point(aes(y = non, color = 'non')) +
+  geom_line(aes(y = acad, color = 'acad')) +
+  geom_line(aes(y = non, color = 'non')) +
+  ggtitle('Total Overhead by Academic and Non-Academic (2012-14)') +
+  xlab('Year') +
+  ylab('Total') +
+  scale_y_continuous(labels = comma)
+  
+
 
 #######################################
 #EXPLORATORY ANALYSIS#
