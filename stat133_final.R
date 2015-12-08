@@ -6,13 +6,22 @@ library(ggplot2)
 library(dplyr)
 library(stringr)
 library(hash)
+library(reshape2)
+library(scales)
 
 uctca_colnames <- c("Name", "Title", "Base", "Overtime", "Other", "Benefits", "Subtotal", "Total", "Year", "Notes", "Agency")
 
 # my working dir: ~/Dropbox/College/Freshman Year/Fall Semester/STAT 133/project
 setwd('~/Dropbox/College/Freshman Year/Fall Semester/STAT 133/project')
 
-#restrict Total more? - Michael
+# these are really slow. Not recommended to run
+#download.file('http://transparentcalifornia.com/export/university-of-california-2011.csv', 'university-of-california-2011.csv')
+#download.file('http://transparentcalifornia.com/export/university-of-california-2012.csv', 'university-of-california-2012.csv')
+#download.file('http://transparentcalifornia.com/export/university-of-california-2013.csv', 'university-of-california-2013.csv')
+#download.file('http://transparentcalifornia.com/export/university-of-california-2014.csv', 'university-of-california-2014.csv')
+
+uc2011 <- read_csv("university-of-california-2011.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+uc2012 <- read_csv("university-of-california-2012.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
 uc2013 <- read_csv("university-of-california-2013.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
 uc2014 <- read_csv("university-of-california-2014.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
 
@@ -158,13 +167,13 @@ uc2014.employee_stats <- uc2014 %>%
 
 #using functions to get total in each department
 
-title_to_dep = get_dep(uc2013$Title) # departments, but ungrouped
-n_dep = apply(title_to_dep, 2, sum) # calculate the number of people in each department, including double-counting
+title_to_dep <- get_dep(uc2013$Title) # departments, but ungrouped
+n_dep <- apply(title_to_dep, 2, sum) # calculate the number of people in each department, including double-counting
 
 barplot(n_dep, las = 2, main = 'Total in Each Defined Department, 2013')
 
 
-grouped_n_dep = c('Faculty' = sum(n_dep[c('Instructor', 'Lecturer',
+grouped_n_dep <- c('Faculty' = sum(n_dep[c('Instructor', 'Lecturer',
                            'Associate', 'Adjunct', 'Assistant',
                            'Academic', 'Visiting', 'Professor')]),
              'Staff' = sum(n_dep[c('Engineer', 'Technician', 'Accounting',
@@ -196,74 +205,64 @@ barplot(tot_dep14_2, main = 'Total by Category, 2014')
 #SORTING BY ACADEMIC AND NON-ACADEMIC#
 #######################################################
 
+titles <- read.csv('academic-titles.csv', strip.white = T, stringsAsFactors = F)
+#titles <- titles[-497, c('Title', 'CTO.Name')]
 
-titles = read_csv('academic-ttles-sorted-title-name.csv')
-titles = titles[-497, c('Title', 'CTO Name')]
-#titles = titles[-497, ]
-#titles$Title = as.character(titles$Title)
+#titles <- titles %>% select(Title, CTO.Name)
 
-#fixing some problems
-#problems found by grep-ing 'PROF', 'GSHIP', etc. in non_acad
-titles$Title[grep('PROF OF CLIN- FY', titles$Title)] = 'PROF OF CLIN-FY'
-titles$Title[grep("RES PROF-MILLER INST -AY", titles$Title)] = "RES PROF-MILLER INST-AY" 
-titles$Title[grep("PROF EMERITUS \\(WOS\\)", titles$Title)] = "PROF EMERITUS(WOS)" 
-titles$Title[grep("LECT SOE-EMERITUS \\(WOS\\)", titles$Title)] = "LECT SOE-EMERITUS(WOS)" 
+#View(titles %>% group_by(CTO.Name) %>% summarize(n = n()) %>% arrange(CTO.Name))
 
-titles$Title[grep("ASSOC IN            - AY-1/9-GSHIP" , titles$Title)] = "ASSOC IN __ -AY-1/9-GSHIP"
-titles$Title[grep("ASSOC IN            -AY-1/9-NON-GSHIP", titles$Title)] = "ASSOC IN__-AY- 1/9 -NON-GSHIP"
-titles$Title[grep("ASSOC IN            -AY-GSHIP" , titles$Title)] = "ASSOC IN ____-AY-GSHIP" 
-titles$Title[grep("READER - GSHIP", titles$Title)] = "READER-GSHIP" 
-titles$Title[grep("REMD TUT I-NON-GSHIP/NON REP", titles$Title)] = "REMD TUT I-NON GSHIP/NON REP"
-titles$Title[grep("REMD TUT I-NON-GSHIP", titles$Title)] = "REMD TUT I-NON GSHIP"
-titles$Title[grep("READER - NON GSHIP", titles$Title)] = "READER-NON GSHIP"
-titles$Title[grep("TUT--NON STDNT/NON REP", titles$Title)] = "TUT-NON STDNT/NON REP"
-titles$Title[grep("READER - NON STDNT", titles$Title)] = "READER-NON STDNT"
-
-
-unique_titles <- unique(uc2013$Title)
-title_map <- list()
 
 #this for loop takes a while to run, probably a more efficient way
 #getting warnings for this, didn't before, could be line 135 (as.character...)?
 #seems to be working fine though
-for (i in unique_titles) {
-  title_map[[i]] <- as.character(titles[titles$Title == i, 'CTO Name'])
-}
-
-title_map <- sapply(title_map, function(x) ifelse(x == "character(0)", NA, x))
 
 #title_df <- data.frame(Title = names(title_map), Department = title_map, row.names = NULL, stringsAsFactors = FALSE)
 
-uc2013.departments <- uc2013 %>% mutate(Department = sapply(Title, function(x) title_map[[x]]))
+#uc2013.departments <- uc2013 %>% mutate(Department = sapply(Title, function(x) title_map[[x]][[1]])) # unknown why the subscripts need to be like this
+uc2011 <- left_join(uc2011, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
+uc2012 <- left_join(uc2012, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
+uc2013 <- left_join(uc2013, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
+uc2014 <- left_join(uc2014, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
 
-uc2013.by_department <- uc2013.departments %>% 
-  group_by(Department) %>% 
-    summarize(avg = mean(Total)) %>% 
-     # arrange(avg)
-        filter(avg > 40000 & !is.na(Department)) %>%
-      mutate(Department = reorder(Department, avg))
+academic_by_department <- function(df) {
+  df %>% filter(Academic == TRUE) %>%
+    group_by(Category) %>%
+      summarize(avg = mean(Total),
+                n = n()) %>%
+        mutate(Category = reorder(Category, avg))
+}
 
-group_comp_all_plot <- ggplot(uc2013.by_department, aes(x = Department, y = avg)) + 
-  geom_bar(stat = 'identity') + 
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+uc2011.by_department <- academic_by_department(uc2011)
+uc2012.by_department <- academic_by_department(uc2012)
+uc2013.by_department <- academic_by_department(uc2013)
+uc2014.by_department <- academic_by_department(uc2014)
+               
+uc2013.by_department.filtered <- uc2013.by_department %>%
+  filter(avg > 40000 & n > 2)
 
-group_comp_all_plot + geom_vline(aes(xintercept = sapply(c(1, 2, 3) * 1e5, function(x) (which(sort(uc2013.by_department$avg) > x)[1]))), 
-                                 linetype = 1, color = 'black')
-                                                             
+compare_between_titles.plot <- function(df, filter_df = TRUE) {
+  if (filter_df)
+  {
+    dfn <- df %>% filter(avg > 40000 & n > 2)
+  } else {
+    dfn <- df
+  }
+  # fix from https://stackoverflow.com/questions/5106782/use-of-ggplot-within-another-function-in-r
+  plot_to_return <- ggplot(dfn, aes(x = Category, y = avg), environment = environment()) + 
+                      geom_bar(stat = 'identity') + 
+                      theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+                                                                # get the first index for which avg > (1,2,3)00k
+                    geom_vline(xintercept = sapply(c(1, 2, 3) * 1e5, function(x) which(sort(dfn$avg) > x)[1])) +
+                    geom_text(aes(label = dfn$n), angle = 90, hjust = 1)
+  return(plot_to_return)
+}
 
-#need to make a duplicate to preserve grouped academic titles
-dupli2 = uc2013
-dupli2$Category = dupli
+uc2011.by_department.plot <- compare_between_titles.plot(uc2011.by_department, FALSE)
+uc2012.by_department.plot <- compare_between_titles.plot(uc2012.by_department, TRUE)
+uc2013.by_department.plot <- compare_between_titles.plot(uc2013.by_department, TRUE)
+uc2014.by_department.plot <- compare_between_titles.plot(uc2014.by_department, TRUE)
 
-na_indexes = grep('\\bNA\\b', dupli)
-non_acad_2013 = uc2013[na_indexes, ]
-non_acad_2013$Category = 'NON-ACADEMIC' #so both dfs have same # of columns
-acad_2013 = dupli2[-na_indexes, ]
 
-#acad_2013 excludes visiting and recalled professors/lecturers, also 'RESEARCH PROFESSOR'
-#and 'PROFESSOR-FY-GENCOMP'
-#left 'SPECIAL READER...UCLA' in non_acad
-#'COORD', 'TEACHER' series also messed up
-#should include 'DEAN' stuffs too, 307 in non_acad; also LIBRARIAN
 
 
