@@ -421,6 +421,9 @@ ggplot(data = df_perc, aes(year)) +
   xlab('Year') +
   ylab('Percent')
 
+
+hello 
+
 #######################################
 #EXPLORATORY ANALYSIS#
 #######################################
