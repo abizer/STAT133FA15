@@ -470,7 +470,7 @@ ggplot() +
   geom_density(data = dft, aes(x = tenure, fill = 'tenure'), alpha = 0.7) + 
   geom_density(data = dfc, aes(x = clinical, fill = 'clinical'), alpha = 0.7) +
   geom_density(data = dfh, aes(x = health, fill = 'health'), alpha = 0.7) +
-  scale_fill_discrete(name = 'Legend', labels = c('Clinical', 'Health Sciences Clinical', 'Tenured')) +
+  scale_fill_discrete(name = 'Type of Professor', labels = c('Clinical', 'Health Sciences Clinical', 'Tenured')) +
   ggtitle('Densities of Total Pay by Type of Professor') +
   xlab('Total') +
   ylab('Density')
