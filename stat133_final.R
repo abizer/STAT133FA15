@@ -7,6 +7,7 @@ library(dplyr)
 library(stringr)
 library(hash)
 library(scales)
+library(reshape2)
 
 uctca_colnames <- c("Name", "Title", "Base", "Overtime", "Other", "Benefits", "Subtotal", "Total", "Year", "Notes", "Agency")
 
@@ -233,11 +234,11 @@ barplot(tot_dep14_2, main = 'Total by Category, 2014')
 #SORTING BY ACADEMIC AND NON-ACADEMIC#
 #######################################################
 
-
-titles = read.csv('academic-ttles-sorted-title-name.csv')
-titles = titles[ , c(1, 4)]
-titles = titles[1:496, ]
-titles$Title = as.character(titles$Title)
+titles = read.csv('academic-titles.csv', stringsAsFactors = FALSE)
+#titles = read.csv('academic-ttles-sorted-title-name.csv')
+#titles = titles[ , c(1, 4)]
+#titles = titles[1:496, ]
+#titles$Title = as.character(titles$Title)
 
 #fixing some problems
 #problems found by grep-ing 'PROF', 'GSHIP', etc. in non_acad
@@ -275,7 +276,29 @@ for (i in 1:length(dupli)){
 
 #need to make a duplicate to preserve grouped academic titles
 dupli2 = uc2013
-dupli2$Category = dupli
+#dupli2$Category = dupli
+
+dupli2 <- left_join(uc2013, titles, by = 'Title')
+dupli3 = left_join(uc2012, titles, by = 'Title')
+dupli4 = left_join(uc2014, titles, by = 'Title')
+
+dupli2$Category = dupli2$CTO.Name
+dupli2$CTO.Name = NULL
+
+dupli3$Category = dupli3$CTO.Name
+dupli3$CTO.Name = NULL
+
+dupli4$Category = dupli4$CTO.Name
+dupli4$CTO.Name = NULL
+
+acad_2012 = dupli3[is.na(dupli3$Category) == FALSE, ]
+non_acad_2012 = dupli3[is.na(dupli3$Category) == TRUE, ]
+acad_2013 = dupli2[is.na(dupli2$Category) == FALSE, ]
+non_acad_2013 = dupli2[is.na(dupli2$Category) == TRUE, ]
+acad_2014 = dupli4[is.na(dupli4$Category) == FALSE, ]
+non_acad_2014 = dupli4[is.na(dupli4$Category) == TRUE, ]
+
+
 
 na_indexes = grep('\\bNA\\b', dupli)
 non_acad_2013 = uc2013[na_indexes, ]
@@ -353,6 +376,12 @@ t_non = c(sum(non_acad_2012$Total), sum(non_acad_2013$Total), sum(non_acad_2014$
 df_tot = data.frame(year = c(2012, 2013, 2014), acad = t_acad, non = t_non)
 df_tot$dif = df_tot$non - df_tot$acad
 
+
+################################################
+#GRAPHS#
+################################################
+
+
 #Total Overhead over Time
 ggplot(data = df_tot, aes(year)) +
   geom_point(aes(y = acad, color = 'acad')) +
@@ -408,6 +437,8 @@ df_perc = data.frame(enroll = percent_enroll, acad = percent_acad,
                      non = percent_non, total = percent_acad+percent_non, 
                      year = c(2012:2014), row.names = NULL)
 
+
+#graphing percent increase in enrollment vs. # of faculty/staff/admin
 ggplot(data = df_perc, aes(year)) +
   geom_point(aes(y = acad, color = 'acad')) +
   geom_point(aes(y = non, color = 'non')) +
@@ -421,12 +452,38 @@ ggplot(data = df_perc, aes(year)) +
   xlab('Year') +
   ylab('Percent')
 
+
+tenure_prof = acad_2014$Total[acad_2014$Category == 'PROFESSORIAL-TENURE']
+clin_series = acad_2014$Total[acad_2014$Category == "PROFESSOR OF CLINICAL"]
+health_sciences = acad_2014$Total[acad_2014$Category == 'HEALTH SCIENCES CLINICAL PROFESSOR']
+dft = data.frame(tenure = tenure_prof)
+dft = melt(dft)
+dfc = data.frame(clinical = clin_series)
+dfc = melt(dfc)
+dfh = data.frame(health = health_sciences)
+dfh = melt(dfh)
+#df = data.frame(tenure = tenure_prof, clinical = clin_series, health_sciences = health_sciences)
+qplot(x = tenure_prof, geom = 'density', main = 'Distribution of Total Pay of Tenured Professors (2013)',
+      xlab = 'Total Pay')
+
+ggplot() +
+  geom_density(data = dft, aes(x = tenure, fill = 'tenure'), alpha = 0.7) + 
+  geom_density(data = dfc, aes(x = clinical, fill = 'clinical'), alpha = 0.7) +
+  geom_density(data = dfh, aes(x = health, fill = 'health'), alpha = 0.7) +
+  scale_fill_discrete(name = 'Legend', labels = c('Clinical', 'Health Sciences Clinical', 'Tenured')) +
+  ggtitle('Densities of Total Pay by Type of Professor') +
+  xlab('Total') +
+  ylab('Density')
+
+
+
 #######################################
 #EXPLORATORY ANALYSIS#
 #######################################
 tenure_prof = acad_2013$Total[acad_2013$Category == 'PROFESSORIAL-TENURE']
-qplot(x = x, geom = 'density', main = 'Distribution of Total Pay of Tenured Professors (2013)',
+qplot(x = tenure_prof, geom = 'density', main = 'Distribution of Total Pay of Tenured Professors (2013)',
       xlab = 'Total Pay')
+
 acad_2013[acad_2013$Total == max(acad_2013$Total), ] #professor making the most money
 
 avg_pay = tapply(acad_2013$Total, acad_2013$Category, mean)
