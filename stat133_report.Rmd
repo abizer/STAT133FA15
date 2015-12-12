@@ -1,0 +1,242 @@
+---
+title: "Analysis of UC Compensation Data, 2012-2014"
+author: "Angela Dai, Abizer Lokhandwala, Michael Jetsapphasuk, Harry Sutcliffe"
+date: "December 8, 2015"
+output: pdf_document
+---
+
+```{r, echo = F, eval = T}
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(hash)
+library(reshape2)
+library(scales)
+```
+
+# Introduction
+## Description of Problems 
+*Main Research Question:* _How has the University of California pay distribution changed over time?_
+
+## Description of Data
+*Raw Data Sources:* Transparent California (2012-2014), UCOP Academic Title Code, UC Student Enrollment
+
+*Potential Resource:* http://www.air.org/sites/default/files/downloads/report/DeltaCostAIR-Labor-Expensive-Higher-Education-Staffing-Brief-Feb2014.pdf
+
+Note: there are changes from year to year on classification of titles, spellings 
+within years, etc. For our report, we are defining academic and staff as follows:
+Academic employees: those directly engaged in the academic mission – professors, 
+clinical professors, other teaching faculty, researchers, and other academic 
+titles Staff/non-academic employees: those who support academic departments, 
+student services, patient care and other university functions.
+
+## Setup
+
+Setup for this analysis was nontrivial due to the sheer amount of variation in the underlying dataset. For example,
+in one year, the employee names were capitalized, whereas in the others, they were not, and in another year, names were in the form of "fname lname" but in the other years they were in the form of "lname, fname." In one year's data, the titles contained full words - e.g. "PROFESSOR-HCOMP," while the other years used abbreviated title names such as "PROF-HCOMP." Also, the raw datafiles were not properly encoded in some cases - the UC Titles dataset, for example, had 
+strange Unicode characters in a number of titles which we could not correct for in R itself. The UC Titles dataset also had another major problem: in some cases, the words in the titles where separated by a space and/or a hyphen, with no consistency in style, but in the yearly compensation CSVs, the words were separated with different delimiters or number of delimiters, such as two (or more) spaces/hyphens instead of one, or spaces/hyphens switched in with respect to their locations in the Titles dataset, and several other tedious problems like this. Cleaning the data was a major hassle and frustration and data inconsistency severely handicapped the confidence with which we were able to make any analyses on the dataset at large.
+
+With regards to cleaning, R's tools where unfortunately insufficient for our purposes. We had to resort to command like utilities (cut, sort, sed) and manual munging in a text editor (for cleaning up Unicode, figuring out the permutations of spaces and hyphens necessary to match all the cases we had the patience to find) in order to get a dataset R (and our group) was happy with. Nonetheless, some of R's tools where far superior to any external ones, especially with respect to transforming CSVs - write.csv in particular generates beautiful output that lends itself very well to replicability. 
+
+---
+
+we begin by loading the data as downloaded from the Transparent California website:
+
+```{r, eval = T}
+uctca_colnames <- c("Name", "Title", "Base", "Overtime", "Other", "Benefits", "Subtotal", "Total", "Year", "Notes", "Agency")
+
+uc2011 <- read_csv("university-of-california-2011.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+uc2012 <- read_csv("university-of-california-2012.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+uc2013 <- read_csv("university-of-california-2013.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+uc2014 <- read_csv("university-of-california-2014.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+```
+
+We do an initial filter to only get employees with a total compensation of > $1,000 in order to simplifify slightly the analysis.
+
+General housekeeping:
+```{r, eval = T}
+attributes(uc2013)$problems <- NULL
+attributes(uc2014)$problems <- NULL
+```
+
+Prior to finding the UC Titles dataset, we tried manually grouping the ~2900 unique titles in the datasets via regex. We set up a hash with titles associated with regular expressions that corresponded to those groups:
+```{r, eval = F}
+library(hash)
+
+ml <- hash()
+ml[['Athletics']] <- '^ATH|COACH|TRAINER'
+ml[['Professor']] <- 'PROF[^L]'
+ml[['Administrator']] <- 'SUPV|MGR|ADMIN(ISTRATOR)?| ADM '
+ml[['Academic']] <- 'ACAD(EMIC)?'
+ml[['Accounting']] <- 'ACCOUNT(ANT|ING)'
+ml[['Assistant']] <- 'ASST' 
+ml[['Associate']] <- 'ASSOC'
+ml[['Visiting']] <- 'VIS'
+ml[['Adjunct']] <- 'ADJ'
+ml[['Instructor']] <- 'INSTR[^U]' # don't match instrument
+...
+...
+ml[['Management Uncategorized']] <- paste0(
+  'ASC OF PRES OR CHAN|ASSO V CHAN|ASC TO CHAN|AST TREASURER|ASC VP|',
+  'PRESIDENT OF THE UNIV|SECR OF THE REGENTS|SENATE EMERITUS|',
+  'TREASURER OF THE REGENTS')
+```
+
+Using this method, we eventually tagged about 91.5% of the ~250,000 employees in the dataset with a department. However, this method was problematic, as it did not lend itself well to separating employees that fell into multiple categories, such as assistant/associate/visiting/research professors, and still left us with a large number of departments to group further. The code to make this work was also long, slow, and complicated, so we abandoned this thread.
+
+We then found and began cleaning the Title dataset by copy-pasting the table from a PDF provided by the UCOP website into Microsoft Excel and using Excel's CSV output tools to generate a initial, raw CSV datafile. We then read this data into R to begin exploratory analysis. This was a deadend, as we had to use `grep()` and regular expressions to manually correct individual problems in the CSV, and this was ugly, confusing and difficult to maintain. So, we instead used dplyr to extract and sort the columns we wanted and used `write.csv()` to generate a second-stage CSV, which we then piped through a text editor, where we manually made corrections and then used this final CSV as the basis for the rest of our analysis. This was an improvement over our previous attempt, in that it gave us an easy way to separate academic from nonacademic titles, but it was not as granular as our manual, regular-expressions based attempt. Nonetheless, it was the schema we went with for our analysis.
+
+```{r, eval = T}
+titles <- read.csv('academic-titles.csv', strip.white = T, stringsAsFactors = F)
+
+uc2011 <- left_join(uc2011, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
+uc2012 <- left_join(uc2012, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
+uc2013 <- left_join(uc2013, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
+uc2014 <- left_join(uc2014, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
+```
+
+We then get some initial summary statistics (academic only):
+
+```{r, eval = T}
+academic_by_department <- function(df) {
+  df %>% filter(Academic == TRUE) %>%
+    group_by(Category) %>%
+      summarize(avg = mean(Total),
+                n = n()) %>%
+        mutate(Category = reorder(Category, avg))
+}
+
+uc2011.by_department <- academic_by_department(uc2011)
+uc2012.by_department <- academic_by_department(uc2012)
+uc2013.by_department <- academic_by_department(uc2013)
+uc2014.by_department <- academic_by_department(uc2014)
+```
+
+```{r}
+head(uc2011.by_department)
+head(uc2012.by_department)
+head(uc2013.by_department)
+head(uc2014.by_department)
+```
+
+# Analysis Approach
+
+## Academic vs. Staff/Non-Academic Workforce Distribution of Total Compensation, 2012-2014
+```{r, eval = T}
+across_years <- data.frame(
+  'Year' = c(2012, 2013, 2014),
+  'Academic' = c(sum(uc2012[which(uc2012$Academic == TRUE), 'Total']),
+                 sum(uc2013[which(uc2013$Academic == TRUE), 'Total']),
+                 sum(uc2014[which(uc2014$Academic == TRUE), 'Total'])),
+  
+  'Nonacademic' = c(sum(uc2012[which(uc2012$Academic == FALSE), 'Total']),
+                    sum(uc2013[which(uc2013$Academic == FALSE), 'Total']),
+                    sum(uc2014[which(uc2014$Academic == FALSE), 'Total']))
+)
+
+across_years <- across_years %>% 
+  mutate(Difference = Nonacademic - Academic,
+         Total = Academic + Nonacademic)
+
+gp <- ggplot(melt(across_years[, c('Nonacademic', 'Academic', 'Year')], 
+                  id.vars = 'Year', value.name = 'Amount'), 
+             aes(x = Year, y = Amount)) + 
+  geom_bar(aes(fill = variable), stat = 'identity', position = 'fill') + 
+  scale_y_continuous(labels = percent_format()) + 
+  labs(fill = "", 
+       title = 'Academic vs. Nonacademic Spending')
+
+# Acad/Nonacad amounts
+gp <- gp + geom_text(aes(label = paste0('$', format(Amount, big.mark = ',')), 
+                         y = 0.4, ymax = 1), 
+                     position = 'stack', size = rel(3), color = 'azure', fontface = 'bold')
+# total amt
+gp <- gp + geom_text(data = across_years, 
+                     aes(label = paste0('$', format(Total, big.mark = ',')), 
+                         y = 0.2,
+                         x = Year), 
+                     size = rel(3.5), 
+                     color = 'white', 
+                     fontface = 'bold', 
+                     position = 'stack') +
+  theme(legend.position = 'bottom', plot.title = element_text(size = rel(2))) 
+# amt diff
+gp <- gp + geom_text(data = across_years,
+                     aes(label = paste0('-$', format(Difference, big.mark = ',')),
+                         y = 0.15,
+                         x = Year),
+                     position = 'stack',
+                     color = 'yellow', 
+                     size = rel(2))
+
+```
+```{r, fig.height = 4, fig.width = 7}
+gp
+```
+
+This could be a bar chart showing changes in breakdown of academic vs staff/non-academic % compensation and changes in overall compensation, with: 
+x-axis: $30k groupings of total compensation
+y-axis: # of employees
+We could conclude: 
+The largest % of academic employees fall in the $x-$x range
+
+##Average Total Compensation for Academic Positions, 2012-2014
+```{r}
+
+
+```
+Conclude: the average pay of academic employees has been increasing/decreasing
+
+##Workforce Headcount vs. Total Compensation Trends, 2012-2014
+```{r}
+
+
+```
+Hypothesize that as headcount rises, compensation expected to rise. Is this tied to changes in student enrollment?
+
+##Components of Total Compensation for Academic vs Staff
+```{r}
+
+
+```
+Hypothesize more benefits for academic positions? E.g. they may have the same salary, but total compensation differs because of benefits.
+
+##Student Services Compensation vs. UC Student Enrollment, 2012-2014
+```{r}
+
+
+```
+Differences in % changes 
+How many student services staff per 1,000 students
+How much has student services compensation changed per 1,000 students
+
+##Workforce Headcount vs. UC Student Enrollment, 2012-2014
+```{r}
+
+
+```
+Hypothesize more headcount with more enrollment
+
+##Workforce Compensation vs. UC Student Enrollment, 2012-2014
+```{r}
+
+
+```
+Hypothesize more compensation with more enrollment. Since academic pay has decreased from 2013-2014,
+how are costs being contained? See next graph
+
+##Changes in % Lecturers vs % Tenured Professors 
+```{r}
+
+
+```
+Are lecturers replacing full-time professors (or vice versa) in effort to contain costs? 
+
+##Changes in Tuition vs Academic Spending
+```{r}
+
+
+```
+It is often perceived that faculty spending is driving tuition increases. Is tuition increasing at the same rate as academic spending?
+
