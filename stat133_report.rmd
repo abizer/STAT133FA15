@@ -71,23 +71,23 @@ How much has student services compensation changed per 1,000 students
 #source: http://finreports.universityofcalifornia.edu/index.php?file=13-14/pdf/fullreport-1314.pdf
 enroll = c(179581, 184562, 183498, 191369)
 names(enroll) = c('2011', '2012', '2013', '2014')
-diff_enroll = c(184562-179581, 183498-184562, 191369-183498)
-names(diff_enroll) = c('2011-12', '2012-13', '2013-14')
-percent_enroll = diff_enroll[2:3] / enroll[2:3]
-percent_enroll = c(0, percent_enroll)
+diff.enroll = c(184562-179581, 183498-184562, 191369-183498)
+names(diff.enroll) = c('2011-12', '2012-13', '2013-14')
+percent.enroll = diff.enroll[2:3] / enroll[2:3]
+percent.enroll = c(0, percent.enroll)
 
-diff_acad = c(nrow(acad_2013)-nrow(acad_2012), nrow(acad_2014)-nrow(acad_2013))
-names(diff_acad) = c('2012-13', '2013-14')
-percent_acad = diff_acad / c(nrow(acad_2012), nrow(acad_2013))
-percent_acad = c(0, percent_acad)
+diff.acad = c(nrow(acad.2013)-nrow(acad.2012), nrow(acad.2014)-nrow(acad.2013))
+names(diff.acad) = c('2012-13', '2013-14')
+percent.acad = diff.acad / c(nrow(acad.2012), nrow(acad.2013))
+percent.acad = c(0, percent.acad)
 
-diff_non = c(nrow(non_acad_2013)-nrow(non_acad_2012), nrow(non_acad_2014)-nrow(non_acad_2013))
-names(diff_non) = c('2012-13', '2013-14')
-percent_non = diff_non / c(nrow(non_acad_2012), nrow(non_acad_2013))
-percent_non = c(0, percent_non)
+diff.non = c(nrow(non.acad.2013)-nrow(non.acad.2012), nrow(non.acad.2014)-nrow(non.acad.2013))
+names(diff.non) = c('2012-13', '2013-14')
+percent.non = diff.non / c(nrow(non.acad.2012), nrow(non.acad.2013))
+percent.non = c(0, percent.non)
 
-df_perc = data.frame(enroll = percent_enroll, acad = percent_acad, 
-                     non = percent_non, total = percent_acad+percent_non, 
+df.perc = data.frame(enroll = percent.enroll, acad = percent.acad, 
+                     non = percent.non, total = percent.acad+percent.non, 
                      year = c(2012:2014), row.names = NULL)
 
 
@@ -129,4 +129,63 @@ Are lecturers replacing full-time professors (or vice versa) in effort to contai
 
 ```
 It is often perceived that faculty spending is driving tuition increases. Is tuition increasing at the same rate as academic spending?
+
+
+##Total Compensation by Acad/Non-Acad over Time
+```{r}
+#Total Overhead over Time
+ggplot(data = df_tot, aes(year)) +
+  geom_point(aes(y = acad, color = 'acad')) +
+  geom_point(aes(y = non, color = 'non')) +
+  geom_line(aes(y = acad, color = 'acad')) +
+  geom_line(aes(y = non, color = 'non')) +
+  ggtitle('Total Overhead by Academic and Non-Academic (2012-14)') +
+  xlab('Year') +
+  ylab('Total')
+  
+#Difference in Overhead
+ggplot(data = df_tot, aes(year)) +
+  geom_point(aes(y = dif, color = 'dif')) +
+  geom_line(aes(y = dif, color = 'dif')) +
+  ggtitle('Difference between Academic and Non-Academic Total Overhead (2012-14)') +
+  xlab('Year') +
+  ylab('Difference')
+
+#Two graphs above combined
+ggplot(data = df_tot, aes(year)) +
+  geom_point(aes(y = acad, color = 'acad')) +
+  geom_point(aes(y = non, color = 'non')) +
+  geom_point(aes(y = dif, color = 'dif')) +
+  geom_line(aes(y = acad, color = 'acad')) +
+  geom_line(aes(y = non, color = 'non')) +
+  geom_line(aes(y = dif, color = 'dif')) +
+  ggtitle('Total Overhead by Academic and Non-Academic (2012-14)') +
+  xlab('Year') +
+  ylab('Total/Difference (in USD)')
+
+```
+
+
+##Comparing Compensation for Three Types of Professor
+
+```{r}
+
+#Densities of Total Pay by Type of Professor
+tenure.prof = acad.2014$Total[acad.2014$Category == 'PROFESSORIAL-TENURE']
+clin.series = acad.2014$Total[acad.2014$Category == "PROFESSOR OF CLINICAL"]
+health.sciences = acad.2014$Total[acad.2014$Category == 'HEALTH SCIENCES CLINICAL PROFESSOR']
+dft = data.frame(tenure = tenure.prof)
+dfc = data.frame(clinical = clin.series)
+dfh = data.frame(health = health.sciences)
+
+ggplot() +
+  geom_density(data = dft, aes(x = tenure, fill = 'tenure'), alpha = 0.7) + 
+  geom_density(data = dfc, aes(x = clinical, fill = 'clinical'), alpha = 0.7) +
+  geom_density(data = dfh, aes(x = health, fill = 'health'), alpha = 0.7) +
+  scale_fill_discrete(name = 'Type of Professor', labels = c('Clinical', 'Health Sciences Clinical', 'Tenured')) +
+  ggtitle('Densities of Total Pay by Type of Professor') +
+  xlab('Total') +
+  ylab('Density')
+
+```
 
