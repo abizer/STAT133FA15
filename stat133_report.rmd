@@ -6,19 +6,21 @@ output: pdf_document
 ---
 
 #Introduction
-In 2014, the largest database of California government employee compensation was released: Transparent California. It is searchable by name and job titles on TransparentCalifornia.com, including more than 2 million salary records. In a time of budget cuts, we wanted to investigate the University of California employees. 
+In 2014, the largest database of California government employee compensation was released: Transparent California. It is searchable by name and job titles on TransparentCalifornia.com and includes over 2 million salary records. Being University of California (UC) students, we will investigate UC employee compensation data. As the delivery of education, research, and health care is labor intensive, payroll costs account for about half of the UC's annual operating budget. Thus, we thought it would be both interesting and important to analyze this data. 
 
 ##Description of Problems 
-Main Research Question: How has the University of California pay distribution changed over time? 
+Our main research question is: How has the University of California pay distribution changed over time and within occupational groups? 
 
 ##Description of Data
 Raw Data Sources: Transparent California (2012-2014), UCOP Academic Title Code, 
 UC Student Enrollment
 
-Potential Resource: http://www.air.org/sites/default/files/downloads/report/DeltaCostAIR-Labor-Expensive-Higher-Education-Staffing-Brief-Feb2014.pdf
+While the availability of this information online may show "transparency and public accountability," the format of the raw data prevented analysis. For example, the data was incredibly inconsistent. Within the same year, there were spelling and abbreviation differences for the same titles. After catching and fixing these across over 200,000 rows of data for each year, we found that from year to year, the title naming system would completely change again. From the UCOP Academic Title Code document, the title classifications also changed from year to year. We took this PDF and exported it as an XLS file, then cleaned this file and exported it as a CSV to work with in R. We then matched the titles accordingly using grep to end up with 60 categories. Then we further separated the data into academic and staff/non-academic employees. For our report, we are defining the classification as follows: 
+* Academic employees: those directly engaged in the academic mission - professors, clinical professors, other teaching faculty, researchers, and other academic titles 
+* Staff/non-academic employees: those who support academic departments, student services, patient care and other university functions
 
-Note: there are changes from year to year on classification of titles, spellings within years, etc. For our report, we are defining academic and staff as follows: Academic employees: those directly engaged in the academic mission – professors, clinical professors, other teaching faculty, researchers, and other academic titles 
-Staff/non-academic employees: those who support academic departments, student services, patient care and other university functions
+
+Potential Resource: http://www.air.org/sites/default/files/downloads/report/DeltaCostAIR-Labor-Expensive-Higher-Education-Staffing-Brief-Feb2014.pdf
 
 #Analysis Approach
 
