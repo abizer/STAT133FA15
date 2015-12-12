@@ -1,0 +1,132 @@
+---
+title: "stat133_report"
+author: "Angela Dai"
+date: "December 8, 2015"
+output: pdf_document
+---
+
+#Introduction
+##Description of Problems 
+Main Research Question: How has the University of California pay distribution 
+changed over time? 
+
+##Description of Data
+Raw Data Sources: Transparent California (2012-2014), UCOP Academic Title Code, 
+UC Student Enrollment
+
+Potential Resource: http://www.air.org/sites/default/files/downloads/report/DeltaCostAIR-Labor-Expensive-Higher-Education-Staffing-Brief-Feb2014.pdf
+
+Note: there are changes from year to year on classification of titles, spellings 
+within years, etc. For our report, we are defining academic and staff as follows:
+Academic employees: those directly engaged in the academic mission – professors, 
+clinical professors, other teaching faculty, researchers, and other academic 
+titles
+Staff/non-academic employees: those who support academic departments, 
+student services, patient care and other university functions
+
+#Analysis Approach
+##Academic vs. Staff/Non-Academic Workforce Distribution of Total Compensation, 2012-2014
+```{r}
+
+
+```
+This could be a bar chart showing changes in breakdown of academic vs staff/non-academic % compensation and changes in overall compensation, with: 
+x-axis: $30k groupings of total compensation
+y-axis: # of employees
+We could conclude: 
+The largest % of academic employees fall in the $x-$x range
+
+##Average Total Compensation for Academic Positions, 2012-2014
+```{r}
+
+
+```
+Conclude: the average pay of academic employees has been increasing/decreasing
+
+##Workforce Headcount vs. Total Compensation Trends, 2012-2014
+```{r}
+
+
+```
+Hypothesize that as headcount rises, compensation expected to rise. Is this tied to changes in student enrollment?
+
+##Components of Total Compensation for Academic vs Staff
+```{r}
+
+
+```
+Hypothesize more benefits for academic positions? E.g. they may have the same salary, but total compensation differs because of benefits.
+
+##Student Services Compensation vs. UC Student Enrollment, 2012-2014
+```{r}
+
+
+```
+Differences in % changes 
+How many student services staff per 1,000 students
+How much has student services compensation changed per 1,000 students
+
+##Workforce Headcount vs. UC Student Enrollment, 2012-2014
+```{r}
+#source: http://finreports.universityofcalifornia.edu/index.php?file=13-14/pdf/fullreport-1314.pdf
+enroll = c(179581, 184562, 183498, 191369)
+names(enroll) = c('2011', '2012', '2013', '2014')
+diff_enroll = c(184562-179581, 183498-184562, 191369-183498)
+names(diff_enroll) = c('2011-12', '2012-13', '2013-14')
+percent_enroll = diff_enroll[2:3] / enroll[2:3]
+percent_enroll = c(0, percent_enroll)
+
+diff_acad = c(nrow(acad_2013)-nrow(acad_2012), nrow(acad_2014)-nrow(acad_2013))
+names(diff_acad) = c('2012-13', '2013-14')
+percent_acad = diff_acad / c(nrow(acad_2012), nrow(acad_2013))
+percent_acad = c(0, percent_acad)
+
+diff_non = c(nrow(non_acad_2013)-nrow(non_acad_2012), nrow(non_acad_2014)-nrow(non_acad_2013))
+names(diff_non) = c('2012-13', '2013-14')
+percent_non = diff_non / c(nrow(non_acad_2012), nrow(non_acad_2013))
+percent_non = c(0, percent_non)
+
+df_perc = data.frame(enroll = percent_enroll, acad = percent_acad, 
+                     non = percent_non, total = percent_acad+percent_non, 
+                     year = c(2012:2014), row.names = NULL)
+
+
+#graphing percent increase in enrollment vs. # of faculty/staff/admin
+ggplot(data = df_perc, aes(year)) +
+  geom_point(aes(y = acad, color = 'acad')) +
+  geom_point(aes(y = non, color = 'non')) +
+  geom_point(aes(y = total, color = 'total')) +
+  geom_point(aes(y = enroll, color = 'enroll')) +
+  geom_line(aes(y = acad, color = 'acad')) +
+  geom_line(aes(y = non, color = 'non')) +
+  geom_line(aes(y = total, color = 'total')) +
+  geom_line(aes(y = enroll, color = 'enroll')) +
+  ggtitle('Percent Increase in Enrollment Compared to Faculty/Staff (2012-14)') +
+  xlab('Year') +
+  ylab('Percent')
+
+```
+Hypothesize more headcount with more enrollment
+
+##Workforce Compensation vs. UC Student Enrollment, 2012-2014
+```{r}
+
+
+```
+Hypothesize more compensation with more enrollment. Since academic pay has decreased from 2013-2014,
+how are costs being contained? See next graph
+
+##Changes in % Lecturers vs % Tenured Professors 
+```{r}
+
+
+```
+Are lecturers replacing full-time professors (or vice versa) in effort to contain costs? 
+
+##Changes in Tuition vs Academic Spending
+```{r}
+
+
+```
+It is often perceived that faculty spending is driving tuition increases. Is tuition increasing at the same rate as academic spending?
+
