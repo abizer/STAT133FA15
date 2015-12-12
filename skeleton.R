@@ -1,33 +1,43 @@
 #creating subdirectories
 dir.create('code')
-dir.create('rawdata')
+
 dir.create('data')
 dir.create('resources')
 dir.create('report')
 dir.create('images')
 
-#downloading raw data
-download.file('http://transparentcalifornia.com/export/university-of-california-2011.csv',
-              'rawdata/university-of-california-2011.csv')
-download.file('http://transparentcalifornia.com/export/university-of-california-2012.csv',
-              'rawdata/university-of-california-2012.csv')
-download.file('http://transparentcalifornia.com/export/university-of-california-2013.csv',
-              'rawdata/university-of-california-2013.csv')
-download.file('http://transparentcalifornia.com/export/university-of-california-2014.csv',
-              'rawdata/university-of-california-2014.csv')
+# Raw Data
+if (!dir.exists('rawdata')) {
+  dir.create('rawdata')
+ 
+  # four years worth of financial data
+  download.file('http://transparentcalifornia.com/export/university-of-california-2011.csv',
+                'rawdata/university-of-california-2011.csv')
+  download.file('http://transparentcalifornia.com/export/university-of-california-2012.csv',
+                'rawdata/university-of-california-2012.csv')
+  download.file('http://transparentcalifornia.com/export/university-of-california-2013.csv',
+                'rawdata/university-of-california-2013.csv')
+  download.file('http://transparentcalifornia.com/export/university-of-california-2014.csv',
+                'rawdata/university-of-california-2014.csv')
+  
+  # our manually-cleaned titles.csv
+  download.file('https://github.com/tahabi/STAT133FA15/blob/master/academic-titles.csv',
+                'rawdata/academic-titles.csv')
+  
+  # the original titles PDF
+  download.file('http://www.ucop.edu/academic-personnel-programs/_files/acad-title-codes/academic-ttles-sorted-title-name.pdf',
+                'resources/acad-title-codes.pdf')
+  # UC student enrollment data
+  download.file('http://finreports.universityofcalifornia.edu/index.php?file=13-14/pdf/fullreport-1314.pdf',
+                'resources/enrollment-data.pdf')
+}
 
-#downloading resource files
-download.file('http://www.ucop.edu/academic-personnel-programs/_files/acad-title-codes/academic-ttles-sorted-title-name.pdf',
-              'resources/acad-title-codes.pdf')
-download.file('http://finreports.universityofcalifornia.edu/index.php?file=13-14/pdf/fullreport-1314.pdf',
-              'resources/enrollment-data.pdf')
 
-#creating data dictionary in rawdata subdirectory
-uc2014 = read.csv('rawdata/university-of-california-2014.csv')
-var.names = colnames(uc2014)
-var.def = c('Names of each individual',
-            'The title of the individual. Note that there are many unique title names.
-            This will need to be cleaned.',
+# creating data dictionary in rawdata subdirectory
+uc2014.meta <- read.csv('rawdata/university-of-california-2014.csv')
+var.names <- colnames(uc2014.meta)
+var.def <- c('Names of each individual',
+            'Individual\'s title in the UC database',
             'Base Pay',
             'Overtime Pay',
             'Other Pay',
@@ -35,19 +45,18 @@ var.def = c('Names of each individual',
             'Total not including benefits',
             'Total including benefits',
             'Year',
-            'Notes; details if there is individual holds multiple positions',
-            'Agency; all University of California employees')
-var.storage = c()
-for (i in colnames(uc2014)){
-  sub.str = paste0('uc2014$', as.character(i), collapse = '')
-  var.storage = c(var.storage, class(eval(parse(text = sub.str))))
-}
-var.units = c(NA, NA, 'USD', 'USD', 'USD', 'USD', 'USD', 'USD', 'Date', 'NA', 'NA')
+            'Notes - details if an individual holds multiple positions',
+            'Agency - all University of California employees')
+var.storage <- sapply(uc2014.meta, class)
+var.units <- c(NA, NA, 'USD', 'USD', 'USD', 'USD', 'USD', 'USD', 'Date', NA, NA)
 
-meta = data.frame(Variable = var.names, Definition = var.def,
-                  Storage = var.storage, Units = var.units, row.names = NULL)
+meta = data.frame(Variable = as.character(var.names), 
+                  Definition = as.character(var.def),
+                  Storage = as.character(var.storage), 
+                  Units = as.character(var.units), 
+                  row.names = NULL)
 
-write.csv(meta, 'rawdata/meta_data.csv')
+write.csv(meta, 'rawdata/meta_data.csv', quote = F, row.names = F)
                   
                   
                   
