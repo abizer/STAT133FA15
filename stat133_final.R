@@ -6,10 +6,7 @@ library(ggplot2)
 library(dplyr)
 library(stringr)
 library(hash)
-<<<<<<< HEAD
 library(reshape2)
-=======
->>>>>>> angela
 library(scales)
 
 uctca_colnames <- c("Name", "Title", "Base", "Overtime", "Other", "Benefits", "Subtotal", "Total", "Year", "Notes", "Agency")

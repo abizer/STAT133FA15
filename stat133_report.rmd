@@ -104,7 +104,7 @@ uc2013.by_department <- academic_by_department(uc2013)
 uc2014.by_department <- academic_by_department(uc2014)
 ```
 
-```{r, echo = F, eval = T}
+```{r, echo = F, eval = F}
 head(uc2011.by_department)
 head(uc2012.by_department)
 head(uc2013.by_department)
