@@ -6,28 +6,27 @@ output: pdf_document
 ---
 
 #Introduction
-In 2014, the largest database of California government employee compensation was released: Transparent California. It is searchable by name and job titles on TransparentCalifornia.com and includes over 2 million salary records. Being University of California (UC) students, we will investigate UC employee compensation data. As the delivery of education, research, and health care is labor intensive, payroll costs account for about half of the UC's annual operating budget. Thus, we thought it would be both interesting and important to analyze this data. 
+In 2014, the largest database of California government employee compensation was released: Transparent California. It is searchable by name and job titles on TransparentCalifornia.com and includes over 2 million salary records. Being University of California (UC) students, we will investigate UC employee compensation data. With tuition and student debt at all-time highs, university spending is under scrutiny. Since the delivery of education, research, and health care is labor intensive, payroll costs account for about half of the UC's annual operating budget. Thus, we thought it would be both interesting and important to analyze this data. 
 
 ##Description of Problems 
-Our main research question is: How has the University of California pay distribution changed over time and within occupational groups? 
+Our main research question is: How has the University of California pay distribution changed over time? To answer this, we will answer these questions: What are the disparities between academic vs. non-academic pay over time? How much does the average lecturer/professor/etc (academic positions only) make? What does the distribution of pay look like? How has total staff grown in relation to enrollment?
 
 ##Description of Data
-Raw Data Sources: Transparent California (2012-2014), UCOP Academic Title Code, 
-UC Student Enrollment
+Our three primary raw data sources were from TransparentCalifornia.com for 2012, 2013, and 2014 UC compensation data. While the availability of this information online was intended to show "transparency and public accountability," the format of the data prevented analysis. For example, the data was incredibly inconsistent. Within the same year, there were spelling and abbreviation differences for the same titles. After catching and fixing these across over 200,000 rows of data for each year, we found that between 2012, 2013, and 2014, the title coding system would completely change again. To help navigate the title coding system, we used the UCOP Academic Title Code document (however, title classifications also changed from year to year). We took this PDF and exported it as an XLS file, then cleaned this file and exported it as a CSV to work with in R. We then matched the titles accordingly using grep to end up with 60 categories. Then we further separated the data into academic and staff/non-academic employees. We are defining the classification as follows: 
 
-While the availability of this information online may show "transparency and public accountability," the format of the raw data prevented analysis. For example, the data was incredibly inconsistent. Within the same year, there were spelling and abbreviation differences for the same titles. After catching and fixing these across over 200,000 rows of data for each year, we found that from year to year, the title naming system would completely change again. From the UCOP Academic Title Code document, the title classifications also changed from year to year. We took this PDF and exported it as an XLS file, then cleaned this file and exported it as a CSV to work with in R. We then matched the titles accordingly using grep to end up with 60 categories. Then we further separated the data into academic and staff/non-academic employees. For our report, we are defining the classification as follows: 
-* Academic employees: those directly engaged in the academic mission - professors, clinical professors, other teaching faculty, researchers, and other academic titles 
-* Staff/non-academic employees: those who support academic departments, student services, patient care and other university functions
-
-
-Potential Resource: http://www.air.org/sites/default/files/downloads/report/DeltaCostAIR-Labor-Expensive-Higher-Education-Staffing-Brief-Feb2014.pdf
+- Academic employees: those directly engaged in the academic mission - professors, clinical professors, other teaching faculty, researchers, and other academic titles 
+- Staff/non-academic employees: those who support academic departments, student services, patient care and other university functions
 
 #Analysis Approach
+##Pie chart of Distribution of Total Compensation - executive pay, academic, health centers, 
+```{r, echo=FALSE}
 
-Boxplot of professor pay 
-pie chart?
+
+```
+
+
 ##Academic vs. Staff/Non-Academic Workforce Distribution of Total Compensation, 2012-2014
-```{r}
+```{r, echo=FALSE}
 
 
 ```
@@ -38,28 +37,28 @@ We could conclude:
 The largest % of academic employees fall in the $x-$x range
 
 ##Average Total Compensation for Academic Positions, 2012-2014
-```{r}
+```{r, echo=FALSE}
 
 
 ```
 Conclude: the average pay of academic employees has been increasing/decreasing
 
 ##Workforce Headcount vs. Total Compensation Trends, 2012-2014
-```{r}
+```{r, echo=FALSE}
 
 
 ```
 Hypothesize that as headcount rises, compensation expected to rise. Is this tied to changes in student enrollment?
 
 ##Components of Total Compensation for Academic vs Staff
-```{r}
+```{r, echo=FALSE}
 
 
 ```
 Hypothesize more benefits for academic positions? E.g. they may have the same salary, but total compensation differs because of benefits.
 
 ##Student Services Compensation vs. UC Student Enrollment, 2012-2014
-```{r}
+```{r, echo=FALSE}
 
 
 ```
@@ -68,14 +67,14 @@ How many student services staff per 1,000 students
 How much has student services compensation changed per 1,000 students
 
 ##Workforce Headcount vs. UC Student Enrollment, 2012-2014
-```{r}
+```{r, echo=FALSE}
 
 
 ```
 Hypothesize more headcount with more enrollment
 
 ##Workforce Compensation vs. UC Student Enrollment, 2012-2014
-```{r}
+```{r, echo=FALSE}
 
 
 ```
@@ -83,14 +82,14 @@ Hypothesize more compensation with more enrollment. Since academic pay has decre
 how are costs being contained? See next graph
 
 ##Changes in % Lecturers vs % Tenured Professors 
-```{r}
+```{r, echo=FALSE}
 
 
 ```
 Are lecturers replacing full-time professors (or vice versa) in effort to contain costs? 
 
 ##Changes in Tuition vs Academic Spending
-```{r}
+```{r, echo=FALSE}
 
 
 ```
