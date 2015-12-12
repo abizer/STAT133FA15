@@ -17,3 +17,4 @@ cli_google.R
 sw*
 .Rdata
 university-*
+.DS_Store
