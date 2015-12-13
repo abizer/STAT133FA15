@@ -214,7 +214,46 @@ How much has student services compensation changed per 1,000 students
 
 ##Workforce Headcount vs. UC Student Enrollment, 2012-2014
 ```{r, echo=FALSE}
+#source for enrollment can be found in resources folder as enrollment-data.pdf
 
+#this function finds the percent increase per year for 2012-14
+#takes in a numeric vector with three entries
+#will output a vector with three entries for percent increases for 2012-13 and 2013-14
+#first entry will be zero as a baseline and to show increase between 2012-13 in a plot
+find_percent <- function(totals){
+  diff = c(totals[2] - totals[1], totals[3] - totals[2])
+  percents = diff / totals[1:2]
+  percents = c(0, percents)
+  return(percents)
+}
+
+enroll = c(184562, 183498, 191369)
+tot.acad = c(nrow(acad_2012), nrow(acad_2013), nrow(acad_2014))
+tot.non = c(nrow(non_acad_2012), nrow(non_acad_2013), nrow(non_acad_2014))
+
+percent.enroll = find_percent(enroll)
+percent.acad = find_percent(tot.acad)
+percent.non = find_percent(tot.non)
+
+df.perc = data.frame(enroll = percent.enroll, acad = percent.acad, 
+                     non = percent.non, total = percent.acad+percent.non, 
+                     year = c(2012:2014), row.names = NULL)
+
+
+#graphing percent increase in enrollment vs. # of faculty/staff/admin
+ggplot(data = df.perc, aes(year)) +
+  geom_point(aes(y = acad, color = 'Academic')) +
+  geom_point(aes(y = non, color = 'Non-Academic')) +
+  geom_point(aes(y = total, color = 'Total')) +
+  geom_point(aes(y = enroll, color = 'Enrollment')) +
+  geom_line(aes(y = acad, color = 'Academic')) +
+  geom_line(aes(y = non, color = 'Non-Academic')) +
+  geom_line(aes(y = total, color = 'Total')) +
+  geom_line(aes(y = enroll, color = 'Enrollment')) +
+  ggtitle('Percent Increase in Enrollment Compared to Faculty/Staff (2012-14)') +
+  xlab('Year') +
+  ylab('Percent') +
+  scale_color_discrete(name = 'Legend')
 ```
 Hypothesize more headcount with more enrollment
 
@@ -239,4 +278,60 @@ Are lecturers replacing full-time professors (or vice versa) in effort to contai
 It is often perceived that faculty spending is driving tuition increases. Is tuition increasing at the same rate as academic spending?
 
 
+##Total Compensation by Acad/Non-Acad over Time
+```{r, echo=FALSE}
+#Total Overhead over Time
+ggplot(data = df_tot, aes(year)) +
+  geom_point(aes(y = acad, color = 'acad')) +
+  geom_point(aes(y = non, color = 'non')) +
+  geom_line(aes(y = acad, color = 'acad')) +
+  geom_line(aes(y = non, color = 'non')) +
+  ggtitle('Total Overhead by Academic and Non-Academic (2012-14)') +
+  xlab('Year') +
+  ylab('Total')
 
+#Difference in Overhead
+ggplot(data = df_tot, aes(year)) +
+  geom_point(aes(y = dif, color = 'dif')) +
+  geom_line(aes(y = dif, color = 'dif')) +
+  ggtitle('Difference between Academic and Non-Academic Total Overhead (2012-14)') +
+  xlab('Year') +
+  ylab('Difference')
+
+#Two graphs above combined
+ggplot(data = df_tot, aes(year)) +
+  geom_point(aes(y = acad, color = 'acad')) +
+  geom_point(aes(y = non, color = 'non')) +
+  geom_point(aes(y = dif, color = 'dif')) +
+  geom_line(aes(y = acad, color = 'acad')) +
+  geom_line(aes(y = non, color = 'non')) +
+  geom_line(aes(y = dif, color = 'dif')) +
+  ggtitle('Total Overhead by Academic and Non-Academic (2012-14)') +
+  xlab('Year') +
+  ylab('Total/Difference (in USD)')
+
+```
+
+
+##Comparing Compensation for Three Types of Professor
+
+```{r, echo=FALSE}
+
+#Densities of Total Pay by Type of Professor
+tenure.prof = acad.2014$Total[acad.2014$Category == 'PROFESSORIAL-TENURE']
+clin.series = acad.2014$Total[acad.2014$Category == "PROFESSOR OF CLINICAL"]
+health.sciences = acad.2014$Total[acad.2014$Category == 'HEALTH SCIENCES CLINICAL PROFESSOR']
+dft = data.frame(tenure = tenure.prof)
+dfc = data.frame(clinical = clin.series)
+dfh = data.frame(health = health.sciences)
+
+ggplot() +
+  geom_density(data = dft, aes(x = tenure, fill = 'tenure'), alpha = 0.7) + 
+  geom_density(data = dfc, aes(x = clinical, fill = 'clinical'), alpha = 0.7) +
+  geom_density(data = dfh, aes(x = health, fill = 'health'), alpha = 0.7) +
+  scale_fill_discrete(name = 'Type of Professor', labels = c('Clinical', 'Health Sciences Clinical', 'Tenured')) +
+  ggtitle('Densities of Total Pay by Type of Professor') +
+  xlab('Total') +
+  ylab('Density')
+
+```
