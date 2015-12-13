@@ -120,7 +120,7 @@ uc12_14 <- rbind(uc2012.by_department, uc2013.by_department, uc2014.by_departmen
   group_by(Category) %>% 
     summarize(avg = mean(avg),
               n = floor(mean(n))) %>%
-      mutate(Category = reorder(Category,))
+      mutate(Category = reorder(Category, avg))
   
 
 uc12_14.plot <- compare_between_titles.plot(uc12_14, TRUE)
