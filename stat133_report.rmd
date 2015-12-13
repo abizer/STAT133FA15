@@ -1,7 +1,7 @@
 ---
 title: "Analysis of UC Compensation Data, 2012-2014"
 author: "Angela Dai, Abizer Lokhandwala, Michael Jetsupphasuk, Harry Sutcliffe"
-output: pdf_document
+output: html_document
 ---
 
 ```{r, echo = FALSE, eval = TRUE, warning=F, message=F}
@@ -247,32 +247,82 @@ uc2013.nonacademic <- uc2013 %>% filter(Academic == FALSE) %>% select(-Academic)
 uc2014.nonacademic <- uc2014 %>% filter(Academic == FALSE) %>% select(-Academic)
 
 enroll = c(184562, 183498, 191369)
+enroll_grad = c(236691, 238686, 244126) #includes grad
 tot.acad = c(nrow(uc2012.academic), nrow(uc2013.academic), nrow(uc2014.academic))
 tot.non = c(nrow(uc2012.nonacademic), nrow(uc2013.nonacademic), nrow(uc2014.nonacademic))
+tot.pay.acad = c(sum(uc2012.academic$Total), sum(uc2013.academic$Total),
+            sum(as.numeric(uc2014.academic$Total)))
+tot.pay.non = c(sum(uc2012.nonacademic$Total), sum(uc2013.nonacademic$Total),
+                sum(as.numeric(uc2014.nonacademic$Total)))
 
 percent.enroll = find_percent(enroll)
 percent.acad = find_percent(tot.acad)
 percent.non = find_percent(tot.non)
+percent.grad = find_percent(enroll_grad)
+percent.pay.acad = find_percent(tot.pay.acad)
+percent.pay.non = find_percent(tot.pay.non)
 
 df.perc = data.frame(enroll = percent.enroll, acad = percent.acad, 
                      non = percent.non, total = percent.acad+percent.non, 
-                     year = c(2012:2014), row.names = NULL)
+                     year = c(2012:2014), grad = percent.grad, 
+                     pay.acad = percent.pay.acad, pay.non = percent.pay.non,
+                     row.names = NULL)
 
 
 #graphing percent increase in enrollment vs. # of faculty/staff/admin
+ggplot(data = df.perc, aes(year)) +
+  geom_point(aes(y = acad, color = 'Academic Headcount')) +
+  geom_point(aes(y = non, color = 'Non-Academic Headcount')) +
+  geom_point(aes(y = enroll, color = 'Undergraduate Enrollment')) +
+  geom_point(aes(y = grad, color = 'Total Enrollment')) +
+  geom_line(aes(y = acad, color = 'Academic Headcount')) +
+  geom_line(aes(y = non, color = 'Non-Academic Headcount')) +
+  geom_line(aes(y = enroll, color = 'Undergraduate Enrollment')) +
+  geom_line(aes(y = grad, color = 'Total Enrollment')) +
+  ggtitle('Percent Increase in Enrollment Compared to Faculty/Staff (2012-14)') +
+  xlab('Year') +
+  ylab('Percent') +
+  scale_color_discrete(name = 'Legend')
+
+
+ggplot(data = df.perc, aes(year)) +
+  geom_point(aes(y = enroll, color = 'Undergraduate Enrollment')) +
+  geom_point(aes(y = grad, color = 'Total Enrollment')) +
+  geom_point(aes(y = pay.acad, color = 'Total Academic Compensation')) +
+  geom_point(aes(y = pay.non, color = 'Total Non-Academic Compensation')) +
+  geom_line(aes(y = enroll, color = 'Undergraduate Enrollment')) +
+  geom_line(aes(y = grad, color = 'Total Enrollment')) +
+  geom_line(aes(y = pay.acad, color = 'Total Academic Compensation')) +
+  geom_line(aes(y = pay.non, color = 'Total Non-Academic Compensation')) +
+  ggtitle('Percent Increase in Enrollment Compared to Faculty/Staff (2012-14)') +
+  xlab('Year') +
+  ylab('Percent') +
+  scale_color_discrete(name = 'Legend')
+
+
 ggplot(data = df.perc, aes(year)) +
   geom_point(aes(y = acad, color = 'Academic')) +
   geom_point(aes(y = non, color = 'Non-Academic')) +
   geom_point(aes(y = total, color = 'Total')) +
   geom_point(aes(y = enroll, color = 'Enrollment')) +
+  geom_point(aes(y = grad, color = 'Includes Grad')) +
+  geom_point(aes(y = pay.acad, color = 'Total Academic Compensation')) +
+  geom_point(aes(y = pay.non, color = 'Total Non-Academic Compensation')) +
   geom_line(aes(y = acad, color = 'Academic')) +
   geom_line(aes(y = non, color = 'Non-Academic')) +
   geom_line(aes(y = total, color = 'Total')) +
   geom_line(aes(y = enroll, color = 'Enrollment')) +
+  geom_line(aes(y = grad, color = 'Includes Grad')) +
+  geom_line(aes(y = pay.acad, color = 'Total Academic Compensation')) +
+  geom_line(aes(y = pay.non, color = 'Total Non-Academic Compensation')) +
   ggtitle('Percent Increase in Enrollment Compared to Faculty/Staff (2012-14)') +
   xlab('Year') +
   ylab('Percent') +
   scale_color_discrete(name = 'Legend')
+
+#need to reorder legend
+#need to fix some variable names
+#percent change in tuition?
 ```
 Hypothesize more headcount with more enrollment
 
