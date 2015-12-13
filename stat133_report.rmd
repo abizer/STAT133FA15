@@ -30,6 +30,8 @@ With regards to cleaning, R's tools where unfortunately insufficient for our pur
 
 We begin by loading the data as downloaded from the Transparent California website:
 ```{r, echo = F, eval = T}
+setwd('rawdata')
+
 uctca_colnames <- c("Name", "Title", "Base", "Overtime", "Other", "Benefits", "Subtotal", "Total", "Year", "Notes", "Agency")
 
 uc2011 <- read_csv("university-of-california-2011.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
@@ -46,7 +48,7 @@ attributes(uc2014)$problems <- NULL
 ```
 
 Prior to finding the UC Titles dataset, we tried manually grouping the ~2900 unique titles in the datasets via regex. We set up a hash with titles associated with regular expressions that corresponded to those groups:
-```{r, echo = F, eval = T}
+```{r, echo = F, eval = F}
 library(hash)
 
 ml <- hash()
@@ -102,13 +104,6 @@ uc2011.by_department <- academic_by_department(uc2011)
 uc2012.by_department <- academic_by_department(uc2012)
 uc2013.by_department <- academic_by_department(uc2013)
 uc2014.by_department <- academic_by_department(uc2014)
-```
-
-```{r, echo = F, eval = F}
-head(uc2011.by_department)
-head(uc2012.by_department)
-head(uc2013.by_department)
-head(uc2014.by_department)
 ```
 
 *Other Resources:* 
@@ -182,7 +177,7 @@ We could conclude:
 The largest % of academic employees fall in the $x-$x range
 
 ##Average Total Compensation for Academic Positions, 2012-2014
-```{r, echo=FALSE}
+```{r, echo = FALSE}
 
 
 ```

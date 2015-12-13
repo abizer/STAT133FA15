@@ -12,7 +12,7 @@ library(scales)
 uctca_colnames <- c("Name", "Title", "Base", "Overtime", "Other", "Benefits", "Subtotal", "Total", "Year", "Notes", "Agency")
 
 # my working dir: ~/Dropbox/College/Freshman Year/Fall Semester/STAT 133/project
-setwd('~/Dropbox/College/Freshman Year/Fall Semester/STAT 133/project')
+setwd('~/Dropbox/College/Freshman Year/Fall Semester/STAT 133/project/rawdata')
 
 # these are really slow. Not recommended to run
 #download.file('http://transparentcalifornia.com/export/university-of-california-2011.csv', 'university-of-california-2011.csv')
@@ -115,6 +115,15 @@ compare_between_titles.plot <- function(df, filter_df = TRUE) {
                     geom_text(aes(label = dfn$n), angle = 90, hjust = 1)
   return(plot_to_return)
 }
+
+uc12_14 <- rbind(uc2012.by_department, uc2013.by_department, uc2014.by_department) %>%
+  group_by(Category) %>% 
+    summarize(avg = mean(avg),
+              n = floor(mean(n))) %>%
+      mutate(Category = reorder(Category,))
+  
+
+uc12_14.plot <- compare_between_titles.plot(uc12_14, TRUE)
 
 uc2011.by_department.plot <- compare_between_titles.plot(uc2011.by_department, FALSE)
 uc2012.by_department.plot <- compare_between_titles.plot(uc2012.by_department, TRUE)
