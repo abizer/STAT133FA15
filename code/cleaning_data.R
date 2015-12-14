@@ -42,29 +42,31 @@ write.csv(titles, '../data/academic-titles.csv')
 #GENERATING CSV'S FOR EACH YEAR
 ###########################################################
 
-titles <- read.csv('../data/academic-titles.csv', strip.white = T, stringsAsFactors = F)
-#titles <- titles[-497, c('Title', 'CTO.Name')]
+uctca_colnames <- c("Name", "Title", "Base", "Overtime", "Other", "Benefits", "Subtotal", "Total", "Year", "Notes", "Agency")
 
 #restricting total pay to > $1000
 #uc2014 dataset has an extra empty column; removing
-uc2011 <- read_csv("../data/university-of-california-2011.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
-uc2012 <- read_csv("../data/university-of-california-2012.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
-uc2013 <- read_csv("../data/university-of-california-2013.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
-uc2014 <- read_csv("../data/university-of-california-2014.csv", col_names = c(uctca_colnames, 'remove'), skip = 1) %>% filter(Total > 1000)
+uc2011 <- read_csv("../rawdata/university-of-california-2011.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+uc2012 <- read_csv("../rawdata/university-of-california-2012.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+uc2013 <- read_csv("../rawdata/university-of-california-2013.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+uc2014 <- read_csv("../rawdata/university-of-california-2014.csv", col_names = c(uctca_colnames, 'remove'), skip = 1) %>% filter(Total > 1000)
 uc2014$remove = NULL
 
 attributes(uc2013)$problems <- NULL # problems pollute the dataset
 attributes(uc2014)$problems <- NULL
+
+titles <- read.csv('../data/academic-titles.csv', strip.white = T, stringsAsFactors = F)
+#titles <- titles[-497, c('Title', 'CTO.Name')]
 
 uc2011 <- left_join(uc2011, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
 uc2012 <- left_join(uc2012, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
 uc2013 <- left_join(uc2013, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
 uc2014 <- left_join(uc2014, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
 
-write.csv(uc2011, '../data/uc2011.csv')
-write.csv(uc2012, '../data/uc2012.csv')
-write.csv(uc2013, '../data/uc2013.csv')
-write.csv(uc2014, '../data/uc2014.csv')
+write.csv(uc2011, 'data/uc2011.csv')
+write.csv(uc2012, 'data/uc2012.csv')
+write.csv(uc2013, 'data/uc2013.csv')
+write.csv(uc2014, 'data/uc2014.csv')
 
 
 

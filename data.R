@@ -1,14 +1,11 @@
-titles <- read.csv('../data/academic-titles.csv', strip.white = T, stringsAsFactors = F)
-#titles <- titles[-497, c('Title', 'CTO.Name')]
+#========================================================
+#DATA CLEANING
+#========================================================
 
-uc2011 <- left_join(uc2011, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
-uc2012 <- left_join(uc2012, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
-uc2013 <- left_join(uc2013, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
-uc2014 <- left_join(uc2014, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
-
-############################################
+###########################################################
 #FINDING AND SOLVING FOR PROBLEMS IN TITLES
-############################################
+###########################################################
+
 #excluding recalled and visiting professors from dataset
 #problems found by grep-ing 'PROF', 'GSHIP', etc. in non_acad
 #problems usually from spaces and dashes
@@ -38,3 +35,40 @@ titles$Title[grep("TUT--NON STDNT/NON REP", titles$Title)] = "TUT-NON STDNT/NON 
 titles$Title[grep("READER - NON STDNT", titles$Title)] = "READER-NON STDNT"
 
 write.csv(titles, '../data/academic-titles.csv')
+
+
+
+###########################################################
+#GENERATING CSV'S FOR EACH YEAR
+###########################################################
+
+titles <- read.csv('../data/academic-titles.csv', strip.white = T, stringsAsFactors = F)
+#titles <- titles[-497, c('Title', 'CTO.Name')]
+
+#restricting total pay to > $1000
+#uc2014 dataset has an extra empty column; removing
+uc2011 <- read_csv("../data/university-of-california-2011.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+uc2012 <- read_csv("../data/university-of-california-2012.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+uc2013 <- read_csv("../data/university-of-california-2013.csv", col_names = uctca_colnames, skip = 1) %>% filter(Total > 1000)
+uc2014 <- read_csv("../data/university-of-california-2014.csv", col_names = c(uctca_colnames, 'remove'), skip = 1) %>% filter(Total > 1000)
+uc2014$remove = NULL
+
+attributes(uc2013)$problems <- NULL # problems pollute the dataset
+attributes(uc2014)$problems <- NULL
+
+uc2011 <- left_join(uc2011, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
+uc2012 <- left_join(uc2012, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
+uc2013 <- left_join(uc2013, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
+uc2014 <- left_join(uc2014, titles, by = 'Title') %>% mutate(Academic = !is.na(Category))
+
+write.csv(uc2011, '../data/uc2011.csv')
+write.csv(uc2012, '../data/uc2012.csv')
+write.csv(uc2013, '../data/uc2013.csv')
+write.csv(uc2014, '../data/uc2014.csv')
+
+
+
+
+
+
+
