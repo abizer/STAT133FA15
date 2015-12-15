@@ -13,6 +13,14 @@ academic_by_department <- function(df) {
     mutate(Category = reorder(Category, avg))
 }
 
+academic_by_department_sub <- function(df) {
+  df %>% filter(Academic == TRUE) %>%
+    group_by(Category) %>%
+    summarize(avg = mean(Base + Overtime),
+              n = n()) %>%
+    mutate(Category = reorder(Category, avg))
+}
+
 
 compare_between_titles.plot <- function(df, filter_df = TRUE) {
   
@@ -29,6 +37,7 @@ compare_between_titles.plot <- function(df, filter_df = TRUE) {
     labs(x = 'CTO Name', y = 'Average Compensation')
   return(plot_to_return)
 }
+
 
 # For 'Workforce Headcount vs. UC Student Enrollment, 2012-2014' Graph
 
