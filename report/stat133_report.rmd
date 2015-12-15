@@ -158,7 +158,7 @@ uc12_14_sub_all.plot
 
 They are almost identical. It seems cash compensation did indeed increase fairly substantially - the data shows that, in 2013 at least, most academic positions in the UC system received a pretty good raise.
 
-## Separate grpahs
+## Separate graphs
 To better understand the composition of academic employee compensation, we looked at this series of bar charts in more detail. This series shows the distribution of average compensation by position, how many employees are in each segment (noted in the bars), and change over time. Analyzing the 2012 chart using $100k increments, we see that the majority of positions (14,058 employees) earn <$100k, followed by positions (12,919 employees) that earn $100k-200k, and positions (1,140 employees) that earn >$200k. Only two positions earned >$200k: deans and clinical professors. Comparing this finding to the 2013 and 2014 charts, we see a change. For example, tenured astronomers, who had been earning an average of close to $150k in 2012, were earning on average $200k by 2014. That’s an over 35% jump. The same increase in compensation could be seen across the board. Whereas there was not even a >$300 category in 2012, the category was created by clinical professors in 2014, and other positions appear on track to joining the ranks in the foreseeable future. While we see compensation increases, it is also worthy to note the <$100k segment has been growing in headcount, by 50.6% from 2012-2014. Thus there are more people in lower-paying positions. 
 
 ## % Distribution of Spending on Academic vs Non-Academic Employees, 2012-2014
