@@ -1,37 +1,38 @@
-#creating subdirectories
-dir.create('code')
+#=======================================================================================
+#SKELETON
+#=======================================================================================
 
+# creating subdirectories
+dir.create('code')
+dir.create('rawdata')
 dir.create('data')
 dir.create('resources')
 dir.create('report')
 dir.create('images')
 
+
 # Raw Data
-if (!dir.exists('rawdata')) {
-  dir.create('rawdata')
- 
-  # four years worth of financial data
-  download.file('http://transparentcalifornia.com/export/university-of-california-2011.csv',
-                'rawdata/university-of-california-2011.csv')
-  download.file('http://transparentcalifornia.com/export/university-of-california-2012.csv',
-                'rawdata/university-of-california-2012.csv')
-  download.file('http://transparentcalifornia.com/export/university-of-california-2013.csv',
-                'rawdata/university-of-california-2013.csv')
-  download.file('http://transparentcalifornia.com/export/university-of-california-2014.csv',
-                'rawdata/university-of-california-2014.csv')
+# four years worth of financial data from Transparent California
+download.file('http://transparentcalifornia.com/export/university-of-california-2011.csv',
+              'rawdata/university-of-california-2011.csv')
+download.file('http://transparentcalifornia.com/export/university-of-california-2012.csv',
+              'rawdata/university-of-california-2012.csv')
+download.file('http://transparentcalifornia.com/export/university-of-california-2013.csv',
+              'rawdata/university-of-california-2013.csv')
+download.file('http://transparentcalifornia.com/export/university-of-california-2014.csv',
+              'rawdata/university-of-california-2014.csv')
   
-  # our manually-cleaned titles.csv
-  download.file('https://github.com/tahabi/STAT133FA15/blob/master/academic-titles.csv',
-                'rawdata/academic-titles.csv')
-  
-  # the original titles PDF
-  download.file('http://www.ucop.edu/academic-personnel-programs/_files/acad-title-codes/academic-ttles-sorted-title-name.pdf',
-                'resources/acad-title-codes.pdf')
-  
-  # UC student enrollment data
-  download.file('http://finreports.universityofcalifornia.edu/index.php?file=13-14/pdf/fullreport-1314.pdf',
-                'resources/enrollment-data.pdf')
-}
+
+# Resources
+# the original titles PDF
+download.file('http://www.ucop.edu/academic-personnel-programs/_files/acad-title-codes/academic-ttles-sorted-title-name.pdf',
+              'resources/acad-title-codes.pdf')
+
+# UC student enrollment data
+# below line shows original source but it will return an error as there is an initial page
+# where you have to accept an agreement to view the document
+#download.file('http://finreports.universityofcalifornia.edu/index.php?file=13-14/pdf/fullreport-1314.pdf',
+#              'resources/enrollment-data.pdf')
 
 
 # creating data dictionary in rawdata subdirectory
