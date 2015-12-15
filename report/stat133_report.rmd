@@ -223,7 +223,7 @@ This bar chart represents the same information as the previous one, but in absol
 
 uc2012.academic <- uc2012[uc2012$Academic, ]
 uc2013.academic <- uc2013[uc2013$Academic, ]
-uc2014.academic <- uc2013[uc2014$Academic, ]
+uc2014.academic <- uc2014[uc2014$Academic, ]
 
 uc2012.nonacademic <- uc2012[!uc2012$Academic, ]
 uc2013.nonacademic <- uc2013[!uc2013$Academic, ]
@@ -256,13 +256,18 @@ In this density chart, we explore the 2014 compensation of three types of profes
 #source for enrollment can be found in resources folder as enrollment-data.pdf
 
 enroll = c(184562, 183498, 191369)
+
 enroll_grad = c(236691, 238686, 244126) #includes grad
+
 tot.acad = c(nrow(uc2012.academic), nrow(uc2013.academic), nrow(uc2014.academic))
+
 tot.non = c(nrow(uc2012.nonacademic), nrow(uc2013.nonacademic), nrow(uc2014.nonacademic))
+
 tot.pay.acad = c(sum(uc2012.academic$Total), sum(uc2013.academic$Total),
-            sum(as.numeric(uc2014.academic$Total)))
+                 sum(uc2014.academic$Total))
+
 tot.pay.non = c(sum(uc2012.nonacademic$Total), sum(uc2013.nonacademic$Total),
-                sum(as.numeric(uc2014.nonacademic$Total)))
+                sum(uc2014.nonacademic$Total))
 
 percent.enroll = find_percent(enroll)
 percent.acad = find_percent(tot.acad)
@@ -299,7 +304,7 @@ ggplot(data = df.perc, aes(year)) +
 This chart shows the trend in % changes in workforce headcount vs student enrollment. We hypothesized that across student types, as enrollment increased, workforce headcount would also increase (and vice versa). We looked at undergraduate enrollment alone, as well as undergraduate and graduate enrollment combined. This is because the UC is a research university and its academic workforce includes not only teaching, but research too, which graduate students partake in and thus are important to account for. Between 2012 and 2013, there is a decline in undergraduate student enrollment, but both academic and non-academic headcount increase. In contrast, between 2013 and 2014, there is a steep increase in undergraduate student enrollment, but academic headcount growth slows and non-academic headcount speeds up. This was surprising, as we expected to see more parallel lines and these are intersecting. However, when we looked at student enrollment overall, we see that between 2012 and 2013, though undergraduate enrollment declines, graduate student enrollment is high enough to bring the overall student enrollment up.  This could explain why headcount has been rising. 
 
 ## Workforce Compensation vs. UC Student Enrollment, 2012-2014
-```{r, echo=FALSE}
+```{r, fig.width=10, fig.height=6, echo=F, warning = F, message = F, error = F}
 ggplot(data = df.perc, aes(year)) +
   geom_point(aes(y = enroll, color = 'Undergraduate Enrollment')) +
   geom_point(aes(y = grad, color = 'Total Enrollment')) +
