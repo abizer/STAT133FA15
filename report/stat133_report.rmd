@@ -1,7 +1,7 @@
 ---
 title: "Analysis of UC Compensation Data, 2012-2014"
 author: "Angela Dai, Abizer Lokhandwala, Michael Jetsupphasuk, Harry Sutcliffe"
-output: html_document
+output: pdf_document
 ---
 
 ```{r, echo = FALSE, eval = TRUE, warning = F, message = F}
@@ -19,15 +19,13 @@ source('../code/functions.R')
 ```
 
 # Introduction
-In 2014, the largest database of California government employee compensation was released: Transparent California. 
-It is searchable by name and job titles on TransparentCalifornia.com and includes over 2 million salary records. 
-Being University of California (UC) students, we will investigate UC employee compensation data. With tuition and student debt at all-time highs, university spending is under scrutiny. Since the delivery of education, research, and health care is labor intensive, payroll costs account for about half of the UC's annual operating budget. Thus, we thought it would be both interesting and important to analyze this data. 
+In 2014, the largest database of California government employee compensation was released: Transparent California. It is searchable by name and job titles on TransparentCalifornia.com and includes over 2 million salary records. Being University of California (UC) students, we will investigate UC employee compensation data. With tuition and student debt at all-time highs, university spending is under scrutiny. Since the delivery of education, research, and health care is labor intensive, payroll costs account for about half of the UC's annual operating budget. Thus, we thought it would be both interesting and important to analyze this data. 
 
 ## Description of Problems
 Our main research question is: How has the University of California pay distribution changed over time? To answer this, we will answer these questions: What are the disparities between academic vs. non-academic pay over time? How much does the average lecturer/professor/etc (academic positions only) make? What does the distribution of pay look like? How has total staff grown in relation to enrollment?
 
 ## Description of Data
-Our three primary raw data sources were from TransparentCalifornia.com for 2012, 2013, and 2014 UC compensation data. Each of the data sets had over 260,000 lines of information covering employee name, job title, base pay, overtime pay, total benefits, total pay, total pay with benefits, year, and agency. While the availability of this information online was intended to show "transparency and public accountability," the format of the data hindered analysis since it was incredibly inconsistent within and between years. To help navigate the title coding system, we used the UCOP Academic Title Code document. 
+Our three primary raw data sources were from TransparentCalifornia.com for 2012, 2013, and 2014 UC compensation data. Each of the data sets had over 260,000 lines of information covering employee name, job title, base pay, overtime pay, total benefits, total pay, total pay with benefits, year, and agency. While the availability of this information online was intended to show "transparency and public accountability," the format of the data hindered analysis since it was incredibly inconsistent within and between years. To help navigate the title coding system, we used the UCOP Academic Title Code document. We also obtained student enrollment figures from the UC Annual Financial Report document. 
 
 ### Set-up
 Set-up for this analysis was nontrivial due to the sheer amount of variation in the underlying dataset. For example, in one year, the employee names were capitalized, whereas in the others, they were not, and in another year, names were in the form of "fname lname" but in the other years they were in the form of "lname, fname." In one year's data, the titles contained full words - e.g. "PROFESSOR-HCOMP," while the other years used abbreviated title names, e.g. "PROF-HCOMP." Also, the raw data files were not properly encoded in some cases - the Title dataset, for example, had strange Unicode characters in a number of titles which we could not correct for in R itself. The Title dataset also had another major problem: in some cases, the words in the titles where separated by a space and/or a hyphen, with no consistency in style, but in the yearly compensation CSVs, the words were separated with different delimiters or number of delimiters, such as two (or more) spaces/hyphens instead of one, or spaces/hyphens switched in with respect to their locations in the Title dataset, and several other tedious problems like this. Cleaning the data was a major hassle and frustration. Data inconsistency handicapped the confidence with which we were able to make any analyses on the dataset at large.
@@ -75,7 +73,8 @@ teaching faculty, researchers, and other academic titles
 **Other Resources:**
 
 * Desrochers, D. M., & Kirshstein, R. J. (2014). Labor intensive or labor expensive? Changing staffing and compensation     patterns in higher education (Issue Brief). Washington, DC: American Institutes for Research.
-* UC Student Enrollment
+* UCOP Academic Title Code document
+* UC Annual Financial Report document
 
 ----
 
@@ -118,7 +117,7 @@ uc12_14_all.plot <- ggplot(uc12_14_all, aes(x = Category, y = avg, fill = Year))
 ```{r, fig.height = 8, fig.width = 10, echo = F, warning = F, message = F}
 uc12_14_all.plot + ggtitle('Academic Position Total Compensation by CTO Name, 2012-2014')
 ```
-The lines are located at $100,000 intervals. We can see some interesting things in this graph - it seems that many departments received a substantial (enormous, in some cases) raise from 2012 to 2014. However, this conflicts with reports released by the UCOP that suggest that on average, UC employees have gone raise-less for several years. Perhaps 
+The lines are located at $100k intervals. We can see some interesting things in this graph - it seems that many departments received a substantial (enormous, in some cases) raise from 2012 to 2014. However, this conflicts with reports released by the UCOP that suggest that on average, UC employees have gone raise-less for several years. Perhaps 
 this reflects an increase in non-cash/benefits compensation, such as a new health plan?
 
 If we only take cash compensation (i.e. total minus estimated cash value of benefits), the graph looks like this:
@@ -159,7 +158,10 @@ uc12_14_sub_all.plot
 
 They are almost identical. It seems cash compensation did indeed increase fairly substantially - the data shows that, in 2013 at least, most academic positions in the UC system received a pretty good raise.
 
-## Academic vs. Staff/Non-Academic Workforce Distribution of Total Compensation, 2012-2014
+## Separate grpahs
+To better understand the composition of academic employee compensation, we looked at this series of bar charts in more detail. This series shows the distribution of average compensation by position, how many employees are in each segment (noted in the bars), and change over time. Analyzing the 2012 chart using $100k increments, we see that the majority of positions (14,058 employees) earn <$100k, followed by positions (12,919 employees) that earn $100k-200k, and positions (1,140 employees) that earn >$200k. Only two positions earned >$200k: deans and clinical professors. Comparing this finding to the 2013 and 2014 charts, we see a change. For example, tenured astronomers, who had been earning an average of close to $150k in 2012, were earning on average $200k by 2014. That’s an over 35% jump. The same increase in compensation could be seen across the board. Whereas there was not even a >$300 category in 2012, the category was created by clinical professors in 2014, and other positions appear on track to joining the ranks in the foreseeable future. While we see compensation increases, it is also worthy to note the <$100k segment has been growing in headcount, by 50.6% from 2012-2014. Thus there are more people in lower-paying positions. 
+
+## % Distribution of Spending on Academic vs Non-Academic Employees, 2012-2014
 
 After that, what about the distribution of academic vs. nonacademic spending? The UC's annual operating budget is substantial, and payroll alone was **`r paste0('$', format(sum(uc2011$Total), big.mark = ','))`** in 2011, **`r paste0('$', format(sum(uc2012$Total), big.mark = ','))`** in 2012, **`r paste0('$', format(sum(uc2013$Total), big.mark = ','))`** in 2013, and **`r paste0('$', format(sum(uc2014$Total), big.mark = ','))`** in 2014, respectively.
 
@@ -215,9 +217,9 @@ gp <- gp + geom_text(data = across_years,
 ```{r, fig.height = 6, fig.width = 10, echo = F, message = F, warning = F, error = F}
 gp
 ```
+To visualize the change in academic and non-academic workforce distribution of total compensation over time, we created a stacked bar chart. The chart shows that relative to non-academic employee compensation, spending on academic employees has been declining from 38.38% to 36.13% to 35.26% of total compensation spending over the last three years. 
 
-Non-stacked:
-
+## $ Distribution of Spending on Academic vs Non-Academic Employees, 2012-2014
 ```{r, echo = F, eval = T}
 gp_nostack <- ggplot(melt(across_years[, c('Nonacademic', 'Academic', 'Year')], 
                   id.vars = 'Year', value.name = 'Amount'), 
@@ -232,41 +234,41 @@ gp_nostack <- ggplot(melt(across_years[, c('Nonacademic', 'Academic', 'Year')],
 gp_nostack
 ```
 
+This bar chart represents the same information as the previous one, but in absolute $ terms. It shows total compensation spending has been increasing, by 25.02% from 2012-2013 and 8.71% from 2013-2014. Both academic and non-academic employee compensation have been rising, however non-academic employee compensation has done so at a higher rate (29.59% non-academic vs 18% academic from 2012-2013, 10.19% vs 6% from 2013-2014). This explains why we saw the decreasing trend in spending on academic employees compared to non-academic employees from year to year.
 
-This could be a bar chart showing changes in breakdown of academic vs staff/non-academic % compensation and changes in overall compensation, with: 
-x-axis: $30k groupings of total compensation
-y-axis: # of employees
-We could conclude: 
-The largest % of academic employees fall in the $x-$x range
+## Density Curve of Pay Within Professorial Titles
+### Tenured Professors, Clinical Professors, and Health Sciences Professors
 
-##Average Total Compensation for Academic Positions, 2012-2014
-```{r, echo = FALSE}
+```{r, echo=FALSE, fig.width=10, fig.height=6, warning = F, message = F}
 
+uc2012.academic = uc2012[uc2012$Academic, ]
+uc2012.nonacademic = uc2012[!uc2012$Academic, ]
+uc2013.academic = uc2013[uc2013$Academic, ]
+uc2013.nonacademic = uc2013[!uc2013$Academic, ]
+uc2014.academic = uc2014[uc2014$Academic, ]
+uc2014.nonacademic = uc2014[!uc2014$Academic, ]
+
+
+#Densities of Total Pay by Type of Professor
+tenure.prof = uc2014.academic$Total[uc2014.academic$Category == 'PROFESSORIAL-TENURE']
+clin.series =  uc2014.academic$Total[uc2014.academic$Category == "PROFESSOR OF CLINICAL"]
+health.sciences = uc2014.academic$Total[uc2014.academic$Category == 'HEALTH SCIENCES CLINICAL PROFESSOR']
+dft = data.frame(tenure = tenure.prof)
+dfc = data.frame(clinical = clin.series)
+dfh = data.frame(health = health.sciences)
+
+ggplot() +
+  geom_density(data = dft, aes(x = tenure, fill = 'tenure'), alpha = 0.7) + 
+  geom_density(data = dfc, aes(x = clinical, fill = 'clinical'), alpha = 0.7) +
+  geom_density(data = dfh, aes(x = health, fill = 'health'), alpha = 0.7) +
+  scale_fill_discrete(name = 'Type of Professor', labels = c('Clinical', 'Health Sciences', 'Tenured')) +
+  ggtitle('Densities of Total Pay by Type of Professor') +
+  xlab('Cash Compensation') +
+  ylab('# of individuals')
 
 ```
 
-
-
-
-Conclude: the average pay of academic employees has been increasing/decreasing
-
-##Workforce Headcount vs. Total Compensation Trends, 2012-2014
-```{r, echo=FALSE}
-
-
-```
-Hypothesize that as headcount rises, compensation expected to rise. Is this tied to changes in student enrollment?
-
-##Components of Total Compensation for Academic vs Staff
-```{r, echo=FALSE}
-
-
-```
-Hypothesize more benefits for academic positions? E.g. they may have the same salary, but total compensation differs because of benefits.
-
-Differences in % changes 
-How many student services staff per 1,000 students
-How much has student services compensation changed per 1,000 students
+In this density chart, we explore the compensation of three types of professors: clinical professors, health sciences clinical professors, and tenured non-clinical professors. We expected clinical and health sciences clinical professors to have the highest compensation. This is from descriptive statistics of the data as well as the UC report that emphasized that health care centers bring the most money to the UC to justify higher compensation for employees related to that function. Thus, we expected overlapping, left skewed graphs. We hypothesized we would see a normal curve for tenured non-clinical professors. The chart was not as clear-cut as we thought it would be. Clinical and health services clinical professors do follow similar distributions, but are right skewed. The distributions confirm that some are making enormous amounts (as seem by the long right tail), but also reveals that not all of them are paid that much. The curve for clinical professors’ compensation is shifted rightwards of the bimodal curve for health sciences clinical professors’ compensation. Many health sciences clinical professors actually are paid less than nearly all tenured professors. This graph does confirm our hypothesis that tenured professors’ compensation follows a fairly normal distribution. There is a very thin right tail, which is understandable given the need to retain and fairly compensate “celebrity” professors. 
 
 ##Workforce Headcount vs. UC Student Enrollment, 2012-2014
 ```{r, echo=FALSE, fig.width=10, fig.height=6, warning=F, message=F}
@@ -330,7 +332,11 @@ ggplot(data = df.perc, aes(year)) +
   scale_y_continuous(label = percent_format()) +
   scale_x_continuous(breaks = 2012:2014) +
   theme(legend.position = 'bottom')
+```
+This chart shows the trend in % changes in workforce headcount vs student enrollment. We hypothesized that across student types, as enrollment increased, workforce headcount would also increase (and vice versa). We looked at undergraduate enrollment alone, as well as undergraduate and graduate enrollment combined. This is because the UC is a research university and its academic workforce includes not only teaching, but research too, which graduate students partake in and thus are important to account for. Between 2012 and 2013, there is a decline in undergraduate student enrollment, but both academic and non-academic headcount increase. In contrast, between 2013 and 2014, there is a steep increase in undergraduate student enrollment, but academic headcount growth slows and non-academic headcount speeds up. This was surprising, as we expected to see more parallel lines and these are intersecting. However, when we looked at student enrollment overall, we see that between 2012 and 2013, though undergraduate enrollment declines, graduate student enrollment is high enough to bring the overall student enrollment up.  This could explain why headcount has been rising. 
 
+##Workforce Compensation vs. UC Student Enrollment, 2012-2014
+```{r, echo=FALSE}
 ggplot(data = df.perc, aes(year)) +
   geom_point(aes(y = enroll, color = 'Undergraduate Enrollment')) +
   geom_point(aes(y = grad, color = 'Total Enrollment')) +
@@ -349,49 +355,7 @@ ggplot(data = df.perc, aes(year)) +
   theme(legend.position = 'bottom')
 
 ```
-Hypothesize more headcount with more enrollment
+Having looked at enrollment’s relation to headcount, we wanted to look further and see whether compensation and enrollment were related using this graph. We expected total compensation paid to grow at the same rate as enrollment. Again, we see the steady enrollment growth, but this graph shows that compensation rose at much higher rates from 2012 to 2013. Since we previously saw that academic headcount grew the most from 2012 to 2013, we expected academic compensation to follow the growth trend. However, this graph shows that non-academic compensation actually grew the most in comparison to academic compensation and enrollment changes, not academic compensation. Non-academic compensation grew at a rate more than 15 times enrollment did. Academic compensation also outgrew enrollment. Then, from 2013-2014 when enrollment grew, both academic and non-academic compensation declined. 
 
-##Workforce Compensation vs. UC Student Enrollment, 2012-2014
-```{r, echo=FALSE}
+We realize we have some limitations, such as only analyzing three years of data, so we cannot make conclusions based off these graphs alone. Nonetheless, we think these are interesting findings that could guide a larger scale study. 
 
-```
-Hypothesize more compensation with more enrollment. Since academic pay has decreased from 2013-2014, how are costs being contained? See next graph
-
-##Changes in % Lecturers vs % Tenured Professors 
-
-```{r, echo=FALSE}
-
-```
-Are lecturers replacing full-time professors (or vice versa) in effort to contain costs? 
-
-
-##Changes in Tuition vs Academic Spending
-```{r, echo=FALSE}
-
-```
-It is often perceived that faculty spending is driving tuition increases. Is tuition increasing at the same rate as academic spending?
-
-
-## Distribution of Pay Within Professorial Titles
-### Tenured Professors, Clinical Professors, and Health Sciences Professors.
-
-```{r, echo=FALSE, fig.width=10, fig.height=6, warning = F, message = F}
-
-#Densities of Total Pay by Type of Professor
-tenure.prof = uc2014.academic$Total[uc2014.academic$Category == 'PROFESSORIAL-TENURE']
-clin.series =  uc2014.academic$Total[uc2014.academic$Category == "PROFESSOR OF CLINICAL"]
-health.sciences = uc2014.academic$Total[uc2014.academic$Category == 'HEALTH SCIENCES CLINICAL PROFESSOR']
-dft = data.frame(tenure = tenure.prof)
-dfc = data.frame(clinical = clin.series)
-dfh = data.frame(health = health.sciences)
-
-ggplot() +
-  geom_density(data = dft, aes(x = tenure, fill = 'tenure'), alpha = 0.7) + 
-  geom_density(data = dfc, aes(x = clinical, fill = 'clinical'), alpha = 0.7) +
-  geom_density(data = dfh, aes(x = health, fill = 'health'), alpha = 0.7) +
-  scale_fill_discrete(name = 'Type of Professor', labels = c('Clinical', 'Health Sciences', 'Tenured')) +
-  ggtitle('Densities of Total Pay by Type of Professor') +
-  xlab('Cash Compensation') +
-  ylab('# of individuals')
-
-```
