@@ -122,14 +122,6 @@ this reflects an increase in non-cash/benefits compensation, such as a new healt
 
 If we only take cash compensation (i.e. total minus estimated cash value of benefits), the graph looks like this:
 ```{r, eval = T, echo = F, error = F, message = F, warning = F}
-academic_by_department_sub <- function(df) {
-  df %>% filter(Academic == TRUE) %>%
-    group_by(Category) %>%
-    summarize(avg = mean(Base + Overtime),
-              n = n()) %>%
-    mutate(Category = reorder(Category, avg))
-}
-
 uc2012.by_department <- academic_by_department_sub(uc2012)
 uc2012.by_department$Year <- '2012'
 uc2013.by_department <- academic_by_department_sub(uc2013)
