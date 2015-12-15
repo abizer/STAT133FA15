@@ -72,8 +72,9 @@ We are defining the classification as follows:
 teaching faculty, researchers, and other academic titles
 * _Staff/non-academic employees_: those who support academic departments, student services, patient care and other university functions
 
-*Other Resources:* 
-* Desrochers, D. M., & Kirshstein, R. J. (2014). Labor intensive or labor expensive? Changing staffing and compensation patterns in higher education (Issue Brief). Washington, DC: American Institutes for Research.
+**Other Resources:**
+
+* Desrochers, D. M., & Kirshstein, R. J. (2014). Labor intensive or labor expensive? Changing staffing and compensation     patterns in higher education (Issue Brief). Washington, DC: American Institutes for Research.
 * UC Student Enrollment
 
 ----
@@ -106,22 +107,15 @@ uc12_14_all.plot <- ggplot(uc12_14_all, aes(x = Category, y = avg, fill = Year))
   geom_bar(position = 'dodge', stat = 'identity') + 
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, size = rel(0.6)),
           legend.position = 'bottom') + 
-      geom_hline(yintercept = c(1, 2, 3) * 1e5) +
+      geom_hline(yintercept = c(1, 2, 3) * 1e5, size = 0.5) +
         geom_text(aes(label = uc12_14_all$n), 
                   angle = 90, hjust = 1, color = '#FFFFFF', 
-                  position = position_dodge(width = 1), size = 4) +
+                  position = position_dodge(width = 1), size = rel(0.5)) +
           labs(x = 'CTO Name', y = 'Average Compensation', 
                title = 'Academic Position Total Compensation by CTO Name, 2012-2014') 
-
-# uc2011.by_department.plot <- compare_between_titles.plot(uc2011.by_department, FALSE)
-#uc2012.by_department.plot <- compare_between_titles.plot(uc2012.by_department, TRUE)
-#uc2013.by_department.plot <- compare_between_titles.plot(uc2013.by_department, TRUE)
-#uc2014.by_department.plot <- compare_between_titles.plot(uc2014.by_department, TRUE)
-#uc12_14.plot <- compare_between_titles.plot(uc12_14, TRUE)
-
 ```
 
-```{r, fig.height = 4, fig.width = 8, echo = F, warning = F, message = F}
+```{r, fig.height = 8, fig.width = 10, echo = F, warning = F, message = F}
 uc12_14_all.plot + ggtitle('Academic Position Total Compensation by CTO Name, 2012-2014')
 ```
 The lines are located at $100,000 intervals. We can see some interesting things in this graph - it seems that many departments received a substantial (enormous, in some cases) raise from 2012 to 2014. However, this conflicts with reports released by the UCOP that suggest that on average, UC employees have gone raise-less for several years. Perhaps 
@@ -132,7 +126,7 @@ If we only take cash compensation (i.e. total minus estimated cash value of bene
 academic_by_department_sub <- function(df) {
   df %>% filter(Academic == TRUE) %>%
     group_by(Category) %>%
-    summarize(avg = mean(Subtotal),
+    summarize(avg = mean(Base + Overtime),
               n = n()) %>%
     mutate(Category = reorder(Category, avg))
 }
@@ -151,30 +145,24 @@ uc12_14_sub_all.plot <- ggplot(uc12_14_all, aes(x = Category, y = avg, fill = Ye
   geom_bar(position = 'dodge', stat = 'identity') + 
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, size = rel(0.6)),
           legend.position = 'bottom') + 
-      geom_hline(yintercept = c(1, 2, 3) * 1e5) +
+      geom_hline(yintercept = c(1, 2, 3) * 1e5, size = 0.5) +
         geom_text(aes(label = uc12_14_all$n), 
                   angle = 90, hjust = 1, color = '#FFFFFF', 
-                  position = position_dodge(width = 1), size = 4) +
+                  position = position_dodge(width = 1), size = rel(0.5)) +
           labs(x = 'CTO Name', y = 'Average Compensation', 
                title = 'Academic Position Subtotal Compensation by CTO Name, 2012-2014') 
 ```
 
-```{r, fig.height = 7, fig.width = 8, echo = F, warning = F, message = F}
+```{r, fig.height = 8, fig.width = 10, echo = F, warning = F, message = F}
 uc12_14_sub_all.plot
 ```
 
-Our data shows that, in 2013 at least, most academic positions in the UC system received a pretty good raise.
-
-
-# Analysis Approach
-## Pie chart of Distribution of Total Compensation - executive pay, academic, health centers
-```{r, echo = F, eval = T}
-
-
-
-```
+They are almost identical. It seems cash compensation did indeed increase fairly substantially - the data shows that, in 2013 at least, most academic positions in the UC system received a pretty good raise.
 
 ## Academic vs. Staff/Non-Academic Workforce Distribution of Total Compensation, 2012-2014
+
+After that, what about the distribution of academic vs. nonacademic spending? The UC's annual operating budget is substantial, and payroll alone was **`r paste0('$', format(sum(uc2011$Total), big.mark = ','))`** in 2011, **`r paste0('$', format(sum(uc2012$Total), big.mark = ','))`** in 2012, **`r paste0('$', format(sum(uc2013$Total), big.mark = ','))`** in 2013, and **`r paste0('$', format(sum(uc2014$Total), big.mark = ','))`** in 2014, respectively.
+
 ```{r, echo = F, eval = T}
 across_years <- data.frame(
   'Year' = c(2012, 2013, 2014),
@@ -197,7 +185,8 @@ gp <- ggplot(melt(across_years[, c('Nonacademic', 'Academic', 'Year')],
   geom_bar(aes(fill = variable), stat = 'identity', position = 'fill') + 
   scale_y_continuous(labels = percent_format()) + 
   labs(fill = "", 
-       title = 'Academic vs. Nonacademic Spending')
+       title = 'Distribution of Spending on Academic vs. Nonacademic employees, 2012-2014',
+       y = 'Amount (% of Total)')
 
 # Acad/Nonacad amounts
 gp <- gp + geom_text(aes(label = paste0('$', format(Amount, big.mark = ',')), 
@@ -212,20 +201,38 @@ gp <- gp + geom_text(data = across_years,
                      color = 'white', 
                      fontface = 'bold', 
                      position = 'stack') +
-  theme(legend.position = 'bottom', plot.title = element_text(size = rel(2))) 
+  theme(legend.position = 'bottom', plot.title = element_text(size = rel(1))) 
 # amt diff
-gp <- gp + geom_text(data = across_years,
-                     aes(label = paste0('-$', format(Difference, big.mark = ',')),
-                         y = 0.15,
-                         x = Year),
-                     position = 'stack',
-                     color = 'yellow', 
-                     size = rel(2))
+# gp <- gp + geom_text(data = across_years,
+#                      aes(label = paste0('-$', format(Difference, big.mark = ',')),
+#                          y = 0.15,
+#                          x = Year),
+#                      position = 'stack',
+#                      color = 'yellow', 
+#                      size = rel(2))
 
 ```
-```{r, fig.height = 4, fig.width = 7}
+```{r, fig.height = 6, fig.width = 10, echo = F, message = F, warning = F, error = F}
 gp
 ```
+
+Non-stacked:
+
+```{r, echo = F, eval = T}
+gp_nostack <- ggplot(melt(across_years[, c('Nonacademic', 'Academic', 'Year')], 
+                  id.vars = 'Year', value.name = 'Amount'), 
+             aes(x = Year, y = Amount)) + 
+  geom_bar(aes(fill = variable), stat = 'identity') + 
+  labs(fill = "", 
+       title = 'Academic vs. Nonacademic Spending') +
+  theme(legend.position = 'bottom')
+```
+
+```{r, fig.height = 6, fig.width = 10, echo = F, message = F, warning = F, error = F}
+gp_nostack
+```
+
+
 This could be a bar chart showing changes in breakdown of academic vs staff/non-academic % compensation and changes in overall compensation, with: 
 x-axis: $30k groupings of total compensation
 y-axis: # of employees
@@ -234,25 +241,6 @@ The largest % of academic employees fall in the $x-$x range
 
 ##Average Total Compensation for Academic Positions, 2012-2014
 ```{r, echo = FALSE}
-compare_between_titles.plot <- function(df, filter_df = TRUE) {
-  if (filter_df)
-  {
-    dfn <- df %>% filter(avg > 40000 & n > 2)
-  } else {
-    dfn <- df
-  }
-  # fix from https://stackoverflow.com/questions/5106782/use-of-ggplot-within-another-function-in-r
-  plot_to_return <- ggplot(dfn, aes(x = Category, y = avg), environment = environment()) + 
-                      geom_bar(stat = 'identity') + 
-                      theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
-                                                                # get the first index for which avg > (1,2,3)00k
-                    geom_vline(xintercept = sapply(c(1, 2, 3) * 1e5, function(x) which(sort(dfn$avg) > x)[1])) +
-                    geom_text(aes(label = dfn$n), angle = 90, hjust = 1) +
-                    theme(axis.text.x = element_text(size = rel(0.5)))
-  return(plot_to_return)
-}
-
-# get a dataframe merging across all three years
 
 
 ```
@@ -276,18 +264,12 @@ Hypothesize that as headcount rises, compensation expected to rise. Is this tied
 ```
 Hypothesize more benefits for academic positions? E.g. they may have the same salary, but total compensation differs because of benefits.
 
-##Student Services Compensation vs. UC Student Enrollment, 2012-2014
-
-```{r, echo=FALSE}
-
-
-```
 Differences in % changes 
 How many student services staff per 1,000 students
 How much has student services compensation changed per 1,000 students
 
 ##Workforce Headcount vs. UC Student Enrollment, 2012-2014
-```{r, echo=FALSE, fig.width=7, fig.height=4}
+```{r, echo=FALSE, fig.width=10, fig.height=6, warning=F, message=F}
 #source for enrollment can be found in resources folder as enrollment-data.pdf
 
 #this function finds the percent increase per year for 2012-14
@@ -341,11 +323,13 @@ ggplot(data = df.perc, aes(year)) +
   geom_line(aes(y = non, color = 'Non-Academic Headcount')) +
   geom_line(aes(y = enroll, color = 'Undergraduate Enrollment')) +
   geom_line(aes(y = grad, color = 'Total Enrollment')) +
-  ggtitle('Percent Increase in Enrollment Compared to Faculty/Staff (2012-14)') +
+  ggtitle('Percent Changes in Student Enrollment vs. Headcount (Academic, Non-academic, Total), 2012-2014') +
   xlab('Year') +
   ylab('Percent') +
-  scale_color_discrete(name = 'Legend')
-
+  scale_color_discrete(name = 'Legend') + 
+  scale_y_continuous(label = percent_format()) +
+  scale_x_continuous(breaks = 2012:2014) +
+  theme(legend.position = 'bottom')
 
 ggplot(data = df.perc, aes(year)) +
   geom_point(aes(y = enroll, color = 'Undergraduate Enrollment')) +
@@ -356,14 +340,14 @@ ggplot(data = df.perc, aes(year)) +
   geom_line(aes(y = grad, color = 'Total Enrollment')) +
   geom_line(aes(y = pay.acad, color = 'Total Academic Compensation')) +
   geom_line(aes(y = pay.non, color = 'Total Non-Academic Compensation')) +
-  ggtitle('Percent Increase in Enrollment Compared to Faculty/Staff (2012-14)') +
+  ggtitle('Percent Change in Enrollment vs. Compensation (Academic, Non-academic, Total), 2012-2014)') +
   xlab('Year') +
   ylab('Percent') +
-  scale_color_discrete(name = 'Legend')
+  scale_color_discrete(name = 'Legend') + 
+  scale_y_continuous(label = percent_format()) +
+  scale_x_continuous(breaks = 2012:2014) +
+  theme(legend.position = 'bottom')
 
-#need to reorder legend
-#need to fix some variable names
-#percent change in tuition?
 ```
 Hypothesize more headcount with more enrollment
 
@@ -388,48 +372,10 @@ Are lecturers replacing full-time professors (or vice versa) in effort to contai
 It is often perceived that faculty spending is driving tuition increases. Is tuition increasing at the same rate as academic spending?
 
 
-##Total Compensation by Acad/Non-Acad over Time
-```{r, echo=FALSE, fig.width=7, fig.height=4}
-#Total Overhead over Time
-ggplot(data = across_years, aes(Year)) +
-  geom_point(aes(y = Academic, color = 'acad')) +
-  geom_point(aes(y = Nonacademic, color = 'non')) +
-  geom_line(aes(y = Academic, color = 'acad')) +
-  geom_line(aes(y = Nonacademic, color = 'non')) +
-  ggtitle('Total Overhead by Academic and Non-Academic (2012-14)') +
-  xlab('Year') +
-  ylab('Total')
-```
-```{r, echo=FALSE, fig.width=7, fig.height=4}
+## Distribution of Pay Within Professorial Titles
+### Tenured Professors, Clinical Professors, and Health Sciences Professors.
 
-#Difference in Overhead
-ggplot(data = across_years, aes(Year)) +
-  geom_point(aes(y = Difference, color = 'dif')) +
-  geom_line(aes(y = Difference, color = 'dif')) +
-  ggtitle('Difference between Academic and Non-Academic Total Overhead (2012-14)') +
-  xlab('Year') +
-  ylab('Difference')
-```
-```{r, echo=FALSE, fig.width=7, fig.height=4}
-
-#Two graphs above combined
-ggplot(data = across_years, aes(Year)) +
-  geom_point(aes(y = Academic, color = 'acad')) +
-  geom_point(aes(y = Nonacademic, color = 'non')) +
-  geom_point(aes(y = Difference, color = 'dif')) +
-  geom_line(aes(y = Academic, color = 'acad')) +
-  geom_line(aes(y = Nonacademic, color = 'non')) +
-  geom_line(aes(y = Difference, color = 'dif')) +
-  ggtitle('Total Overhead by Academic and Non-Academic (2012-14)') +
-  xlab('Year') +
-  ylab('Total/Difference (in USD)')
-
-```
-
-
-##Comparing Compensation for Three Types of Professor
-
-```{r, echo=FALSE, fig.width=7, fig.height=4}
+```{r, echo=FALSE, fig.width=10, fig.height=6, warning = F, message = F}
 
 #Densities of Total Pay by Type of Professor
 tenure.prof = uc2014.academic$Total[uc2014.academic$Category == 'PROFESSORIAL-TENURE']
@@ -443,9 +389,9 @@ ggplot() +
   geom_density(data = dft, aes(x = tenure, fill = 'tenure'), alpha = 0.7) + 
   geom_density(data = dfc, aes(x = clinical, fill = 'clinical'), alpha = 0.7) +
   geom_density(data = dfh, aes(x = health, fill = 'health'), alpha = 0.7) +
-  scale_fill_discrete(name = 'Type of Professor', labels = c('Clinical', 'Health Sciences Clinical', 'Tenured')) +
+  scale_fill_discrete(name = 'Type of Professor', labels = c('Clinical', 'Health Sciences', 'Tenured')) +
   ggtitle('Densities of Total Pay by Type of Professor') +
-  xlab('Total') +
-  ylab('Density')
+  xlab('Cash Compensation') +
+  ylab('# of individuals')
 
 ```
