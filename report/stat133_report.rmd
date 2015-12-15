@@ -274,17 +274,6 @@ In this density chart, we explore the compensation of three types of professors:
 ```{r, echo=FALSE, fig.width=10, fig.height=6, warning=F, message=F}
 #source for enrollment can be found in resources folder as enrollment-data.pdf
 
-#this function finds the percent increase per year for 2012-14
-#takes in a numeric vector with three entries
-#will output a vector with three entries for percent increases for 2012-13 and 2013-14
-#first entry will be zero as a baseline and to show increase between 2012-13 in a plot
-find_percent <- function(totals){
-  diff = c(totals[2] - totals[1], totals[3] - totals[2])
-  percents = diff / totals[1:2]
-  percents = c(0, percents)
-  return(percents)
-}
-
 uc2012.academic <- uc2012 %>% filter(Academic == TRUE) %>% select(-Academic)
 uc2013.academic <- uc2013 %>% filter(Academic == TRUE) %>% select(-Academic)
 uc2014.academic <- uc2014 %>% filter(Academic == TRUE) %>% select(-Academic)
