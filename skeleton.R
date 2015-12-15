@@ -62,7 +62,7 @@ meta = data.frame(Variable = as.character(var.names),
                   Units = as.character(var.units), 
                   row.names = NULL)
 
-write.csv(meta, 'data/meta_data.csv', quote = F, row.names = F)
+write.csv(meta, 'rawdata/meta_data.csv', quote = F, row.names = F)
                   
                   
                   

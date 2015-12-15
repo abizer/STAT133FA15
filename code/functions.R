@@ -2,6 +2,9 @@
 #FUNCTIONS#
 #==========================================================
 
+# this file depends on ggplot, dplyr and must be sourced properly before
+# anything will work.
+
 academic_by_department <- function(df) {
   df %>% filter(Academic == TRUE) %>%
     group_by(Category) %>%
@@ -12,18 +15,17 @@ academic_by_department <- function(df) {
 
 
 compare_between_titles.plot <- function(df, filter_df = TRUE) {
-  if (filter_df)
-  {
-    dfn <- df %>% filter(avg > 40000 & n > 2)
-  } else {
-    dfn <- df
-  }
+  
+  dfn <- if (filter_df) { filter(df, avg > 40000 & n > 2) } else { df }
+  
   # fix from https://stackoverflow.com/questions/5106782/use-of-ggplot-within-another-function-in-r
   plot_to_return <- ggplot(dfn, aes(x = Category, y = avg), environment = environment()) + 
     geom_bar(stat = 'identity') + 
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
     # get the first index for which avg > (1,2,3)00k
     geom_vline(xintercept = sapply(c(1, 2, 3) * 1e5, function(x) which(sort(dfn$avg) > x)[1])) +
-    geom_text(aes(label = dfn$n), angle = 90, hjust = 1)
+    geom_hline(yintercept = c(1, 2, 3) * 1e5) +
+    geom_text(aes(label = dfn$n), angle = 90, hjust = 1, color = '#FFFFFF') +
+    labs(x = 'CTO Name', y = 'Average Compensation')
   return(plot_to_return)
 }
