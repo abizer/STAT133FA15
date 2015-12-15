@@ -14,3 +14,5 @@ Angela Dai, Michael Jetsupphasuk, Abizer Lokhandwala, Harry Sutcliffe
 3. The resources directory contains two pdf files, one that was used for cleaning the data, and another that was used to get enrollment data.
 4. The report directory contains our report.
 5. The images directory contains all the plots we created for our report.
+
+GitHub Link: https://github.com/tahabi/STAT133FA15

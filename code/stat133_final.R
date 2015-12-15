@@ -38,7 +38,8 @@ uc2013.by_department <- academic_by_department(uc2013)
 uc2014.by_department <- academic_by_department(uc2014)
 
 # try to run some rouch stats across all three canonical years.
-uc12_14 <- rbind(uc2012.by_department, uc2013.by_department, uc2014.by_department) %>%
+uc12_14 <- rbind(uc2012.by_department, uc2013.by_department,
+                 uc2014.by_department) %>%
   group_by(Category) %>% 
     summarize(avg = mean(avg),
               n = floor(mean(n))) %>%
@@ -46,22 +47,31 @@ uc12_14 <- rbind(uc2012.by_department, uc2013.by_department, uc2014.by_departmen
 
 compare_between_titles.plot <- function(df, filter_df = TRUE) {
   
-  dfn <- as.data.frame(ifelse(filter_df, df %>% filter(avg > 40000 & n > 2), df))
+  dfn <- as.data.frame(ifelse(filter_df, df %>% filter(avg > 40000 & n > 2),
+                              df))
   
-  # fix from https://stackoverflow.com/questions/5106782/use-of-ggplot-within-another-function-in-r
-  plot_to_return <- ggplot(dfn, aes(x = Category, y = avg), environment = environment()) + 
+  # fix from 
+  # https://stackoverflow.com/questions/5106782/use-of-ggplot-within-another
+  # -function-in-r
+  plot_to_return <- ggplot(dfn, aes(x = Category, y = avg),
+                           environment = environment()) + 
     geom_bar(stat = 'identity') + 
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
     # get the first index for which avg > (1,2,3)00k
-    geom_vline(xintercept = sapply(c(1, 2, 3) * 1e5, function(x) which(sort(dfn$avg) > x)[1])) +
+    geom_vline(xintercept = sapply(c(1, 2, 3) * 1e5,
+                                   function(x) which(sort(dfn$avg) > x)[1])) +
     geom_text(aes(label = dfn$n), angle = 90, hjust = 1)
   return(plot_to_return)
 }
 
-uc2011.by_department.plot <- compare_between_titles.plot(uc2011.by_department, FALSE)
-uc2012.by_department.plot <- compare_between_titles.plot(uc2012.by_department, TRUE)
-uc2013.by_department.plot <- compare_between_titles.plot(uc2013.by_department, TRUE)
-uc2014.by_department.plot <- compare_between_titles.plot(uc2014.by_department, TRUE)
+uc2011.by_department.plot <- compare_between_titles.plot(uc2011.by_department,
+                                                         FALSE)
+uc2012.by_department.plot <- compare_between_titles.plot(uc2012.by_department,
+                                                         TRUE)
+uc2013.by_department.plot <- compare_between_titles.plot(uc2013.by_department,
+                                                         TRUE)
+uc2014.by_department.plot <- compare_between_titles.plot(uc2014.by_department,
+                                                         TRUE)
 uc12_14.plot <- compare_between_titles.plot(uc12_14, TRUE)
 
 across_years <- data.frame(
@@ -93,7 +103,8 @@ gp <- ggplot(
 # Acad/Nonacad amounts
 gp <- gp + geom_text(aes(label = paste0('$', format(Amount, big.mark = ',')), 
                          y = 0.4, ymax = 1), 
-                     position = 'stack', size = 7, color = 'azure', fontface = 'bold')
+                     position = 'stack', size = 7, color = 'azure',
+                     fontface = 'bold')
 # total amt
 gp <- gp + geom_text(data = across_years, 
                      aes(label = paste0('$', format(Total, big.mark = ',')), 
@@ -106,7 +117,8 @@ gp <- gp + geom_text(data = across_years,
   theme(legend.position = 'bottom', plot.title = element_text(size = rel(2))) 
 # amt diff
 gp <- gp + geom_text(data = across_years,
-                     aes(label = paste0('-$', format(Difference, big.mark = ',')),
+                     aes(label = paste0('-$',
+                                        format(Difference, big.mark = ',')),
                          y = 0.15,
                          x = Year),
                      position = 'stack',
@@ -127,7 +139,8 @@ non_acad_2014 <- uc2014[!uc2014$Academic, ]
 
 
 tenure_prof <- acad_2013$Total[acad_2013$Category == 'PROFESSORIAL-TENURE']
-qplot(x = x, geom = 'density', main = 'Distribution of Total Pay of Tenured Professors (2013)',
+qplot(x = x, geom = 'density',
+      main = 'Distribution of Total Pay of Tenured Professors (2013)',
       xlab = 'Total Pay')
 
 acad_2013[which.max(acad_2013$Total), ] #professor making the most money
@@ -139,8 +152,10 @@ avg_pay
 #smaller groupings: LECT, ADMIN, PROF, GSR/TA/POSTDOC
 copy_2013 <- acad_2013
 copy_acad$Category[grep('LECTURER', copy_acad$Category)] = 'LECTURER'
-copy_acad$Category[grep('DEAN|ACADEMIC|DIRECTOR|PROVOST', copy_acad$Category)] = 'ADMINISTRATOR'
-copy_acad$Category[grep('POSTDOCTORAL|INSTRUCTIONAL|GRADUATE|TEACHING', copy_acad$Category)] = 'GSR/TA/POSTDOC'
+copy_acad$Category[grep('DEAN|ACADEMIC|DIRECTOR|PROVOST',
+                        copy_acad$Category)] = 'ADMINISTRATOR'
+copy_acad$Category[grep('POSTDOCTORAL|INSTRUCTIONAL|GRADUATE|TEACHING',
+                        copy_acad$Category)] = 'GSR/TA/POSTDOC'
 copy_acad$Category[grep('PROF', copy_acad$Category)] = 'PROFESSOR'
 x = tapply(copy_acad$Total, copy_acad$Category, mean)
 y = x[c('ADMINISTRATOR', 'LECTURER', 'PROFESSOR', 'GSR/TA/POSTDOC')]
