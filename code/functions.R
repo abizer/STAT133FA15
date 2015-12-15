@@ -29,3 +29,16 @@ compare_between_titles.plot <- function(df, filter_df = TRUE) {
     labs(x = 'CTO Name', y = 'Average Compensation')
   return(plot_to_return)
 }
+
+# For 'Workforce Headcount vs. UC Student Enrollment, 2012-2014' Graph
+
+# this function finds the percent increase per year for 2012-14
+# takes in a numeric vector with three entries
+# will output a vector with three entries for percent increases for 2012-13 and 2013-14
+# first entry will be zero as a baseline and to show increase between 2012-13 in a plot
+find_percent <- function(totals){
+  diff = c(totals[2] - totals[1], totals[3] - totals[2])
+  percents = diff / totals[1:2]
+  percents = c(0, percents)
+  return(percents)
+}
