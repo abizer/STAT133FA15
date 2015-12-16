@@ -53,16 +53,16 @@ Using this method, we eventually tagged about 91.5% of the ~250,000 employees in
 We then found and began cleaning the Title dataset by exporting a table from a PDF document provided by the UCOP website to Microsoft Excel and using Excel's CSV output tools to generate a initial, raw CSV datafile. We then read this data into R to begin exploratory analysis. This was hindered by text problems, so we first used `grep()` and regular expressions to try and manually correct individual problems in the CSV, but this was ugly and difficult to maintain. Our next step was to use dplyr to extract and sort the columns we wanted and used `write.csv()` to generate a second-stage CSV, which we then piped through a text editor, where we manually made necessary corrections and then used this final CSV as the basis for the rest of our analysis. 
 
 ```{r, echo = T, eval = F}
-titles <- read.csv('../rawdata/academic-titles.csv', stringsAsFactors = FALSE)
+titles <- read.csv('../rawdata/academic_titles.csv', stringsAsFactors = FALSE)
 titles <- titles[1:511, c(1, 4)]
 
 titles$Title[grep('PROF OF CLIN- FY', titles$Title)] <- 'PROF OF CLIN-FY'
 # more such regex replacements
 # ....
 # write interim. Some text problems from the pdf->txt process still have to be fixed by hand.
-write.csv(titles, '../data/academic-titles.csv')
+write.csv(titles, '../data/academic_titles.csv')
 # after making manual corrections where necessary, we now reload the data:
-titles <- read.csv('../data/academic-titles.csv')
+titles <- read.csv('../data/academic_titles.csv')
 ```
 
 Using the titles dataset was an improvement over our previous attempt, in that it gave us an easy way to separate academic from staff/non-academic titles, but it was not as granular as our manual, regular-expressions based method. Nonetheless, the titles version was the schema we used for our analysis. The original method is preserved in `department_regexes.R` in the `code/` subdirectory.
@@ -256,6 +256,7 @@ In this density chart, we explore the 2014 compensation of three types of profes
 
 ```{r, echo=FALSE, fig.width=10, fig.height=6, warning=F, message=F}
 #source for enrollment can be found in resources folder as enrollment-data.pdf
+# functions are all sourced from code/functions.R
 
 enroll = c(184562, 183498, 191369)
 
